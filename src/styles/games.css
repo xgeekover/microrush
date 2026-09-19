@@ -1,0 +1,48 @@
+/* 마이크로게임(catalog) 전용 keyframe. 접두어 fx- 를 그대로 쓰되 이름은 fx.css 와 겹치지 않는다. */
+
+/* 뽑아!: 무가 미끄러져 도로 박힐 때 잎이 흔들린다 */
+@keyframes fx-wiggle {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(-8deg); }
+  75% { transform: rotate(8deg); }
+}
+
+/* 멈춰!(주스): 수면이 출렁인다 */
+@keyframes fx-wave {
+  from { transform: translateY(0) scaleX(1); }
+  to { transform: translateY(-3px) scaleX(1.06); }
+}
+
+/* 연타해!: 누를 때마다 로켓이 움찔, 다 채우면 하늘로 */
+@keyframes fx-bump {
+  0% { transform: translateY(0) scale(1); }
+  40% { transform: translateY(-6px) scale(1.06, 0.94); }
+  100% { transform: translateY(0) scale(1); }
+}
+@keyframes fx-launch {
+  0% { transform: translateY(0) scale(1); }
+  20% { transform: translateY(6px) scale(1.05, 0.95); }
+  100% { transform: translateY(-140vh) scale(0.8); opacity: 0.9; }
+}
+
+/* 골라내!: 표정들이 춤춘다 (animationDelay/Duration 은 인라인) */
+@keyframes fx-dance {
+  from { transform: translateY(0) rotate(-6deg); }
+  to { transform: translateY(-12px) rotate(6deg); }
+}
+
+/* 닦아!: 궤적의 반짝임 — 커졌다 사라진다 */
+.fx-sparkle {
+  color: #fff;
+  text-shadow: 0 0 8px #fff, 0 0 16px #00e5ff;
+  transform: translate(-50%, -50%);
+  animation: fx-sparkle 0.5s ease-out both;
+}
+@keyframes fx-sparkle {
+  0% { transform: translate(-50%, -50%) scale(0.4) rotate(0); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1.6) rotate(90deg); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-sparkle { animation: none; opacity: 0; }
+}

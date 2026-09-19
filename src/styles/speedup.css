@@ -1,0 +1,109 @@
+/*
+ * SPEED UP!! 연출 (SpeedUpBanner.tsx 전용, 접두어 su-).
+ * 1초(RUSH.speedUpMs) 동안 보이는 것을 전제로 길이를 잡았다.
+ * 색은 index.css @theme 토큰을 쓰고, 토큰이 없을 때를 위해 같은 값을 폴백으로 둔다.
+ */
+
+.su-root {
+  background-color: var(--color-rush-red, #ff4757);
+}
+
+/* 노랑/빨강 대각 줄무늬. 한 색 32px, 한 주기 64px.
+ * -45deg 줄무늬가 이음새 없이 반복되려면 타일은 정사각형이고 한 변이 주기 × √2 (= 90.51px) 여야 한다.
+ * 그 한 변만큼 background-position 을 옮기면 처음 모양으로 돌아오므로 무한 루프가 매끈하다. */
+.su-stripes {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    var(--color-rush-yellow, #ffd60a) 0 32px,
+    var(--color-rush-red, #ff4757) 32px 64px
+  );
+  background-size: 90.51px 90.51px;
+  animation: su-stripes 0.45s linear infinite;
+}
+
+/* 첫 0.3초 — 흰 화면이 걷힌다 */
+.su-flash {
+  background-color: #fff;
+  pointer-events: none;
+  animation: su-flash 0.3s ease-out both;
+}
+
+/* 제목 줌인 바운스: 0.6 → 1.15 → 1, 0.4초 */
+.su-title {
+  animation: su-pop 0.4s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+
+/* 두꺼운 그림자 + 네온 번짐. 노랑 위에도 빨강 위에도 읽힌다 */
+.su-text {
+  text-shadow:
+    0 6px 0 rgba(0, 0, 0, 0.45),
+    0 0 28px rgba(255, 214, 10, 0.75);
+}
+
+.su-bolt {
+  filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.4));
+}
+
+/* 배율은 제목이 자리 잡은 뒤 아래에서 떠오른다 */
+.su-mult {
+  color: var(--color-rush-bg, #1a0b2e);
+  background-color: #fff;
+  border-radius: 9999px;
+  padding: 0.25em 1em;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.35);
+  animation: su-rise 0.35s cubic-bezier(0.2, 1.4, 0.4, 1) 0.25s both;
+}
+
+@keyframes su-stripes {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 90.51px 0;
+  }
+}
+
+@keyframes su-flash {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes su-pop {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes su-rise {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* 줄무늬 이동과 화면 플래시는 끈다. 등장 애니메이션은 한 번짜리라 그대로 둔다. */
+  .su-stripes {
+    animation: none;
+  }
+  .su-flash {
+    display: none;
+  }
+}

@@ -1,0 +1,345 @@
+/*
+ * BombTimer — 도화선 타이머 이펙트. 모든 클래스·keyframe 은 `bomb-` 접두어.
+ * index.css 가 이 파일을 @import 한다 (Tailwind 유틸리티는 쓰지 않고 일반 CSS 만).
+ *
+ * 구조 (BombTimer.tsx):
+ *   .bomb-timer[data-state][data-urgent]     루트 · progressbar. 바 28px + 위쪽 헤드룸 24px
+ *     .bomb-bar                               탄 자리 — 검게 그을린 배경 + 회색 잔재 점
+ *     .bomb-fuse                              남은 도화선 (width = ratio). 꼬인 밧줄 줄무늬
+ *     .bomb-head                              불꽃 위치 컨테이너 (left = ratio). 프레임마다 움직이는 건 이것 하나
+ *       ::before                              도화선 끝에서 오른쪽으로 번진 새 그을음
+ *       .bomb-ember                           도화선 끝의 붉은 숯점
+ *       .bomb-flame--outer / --inner          lucide Flame 두 겹 (주황 큰 것 · 노란 작은 것)
+ *       .bomb-spark × N                       불꽃에서 튀어 사라지는 미세 스파크
+ *       .bomb-pop + .bomb-shard × N           시간 초과 순간의 펑 (exploded, 한 번만)
+ */
+
+/* 색 커스텀 프로퍼티를 등록해 두면 노란 → 붉은 전환이 부드럽게 보간된다 */
+@property --bomb-rope-a {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #f2c14e;
+}
+@property --bomb-rope-b {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #a3651c;
+}
+@property --bomb-flame-outer {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #ff8a1f;
+}
+@property --bomb-flame-inner {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #ffe066;
+}
+
+.bomb-timer {
+  --bomb-bar: 28px;
+  --bomb-headroom: 24px;
+  /* 도화선 톤 — 마지막 20% 에서 붉게 넘어간다 (아래 [data-urgent]) */
+  --bomb-rope-a: #f2c14e;
+  --bomb-rope-b: #a3651c;
+  --bomb-flame-outer: #ff8a1f;
+  --bomb-flame-inner: #ffe066;
+  --bomb-flicker-outer: 0.25s;
+  --bomb-flicker-inner: 0.4s;
+  --bomb-spark-scale: 1;
+
+  position: relative;
+  z-index: 0;
+  isolation: isolate;
+  box-sizing: border-box;
+  width: 100%;
+  flex-shrink: 0;
+  /*
+   * 불꽃이 도화선 위로 솟아야 하므로 헤드룸을 padding 으로 잡고, 레이아웃 높이는 음수 마진으로
+   * 바 높이(28px)만 차지하게 한다. overflow:hidden 은 padding 박스에서 자르므로 헤드룸 안의
+   * 불꽃·스파크는 보이고, 좌우·아래로 튀는 파편은 잘려서 페이지 스크롤을 만들지 않는다.
+   * 헤드룸이 main 하단과 겹치므로 포인터 이벤트는 전부 통과시킨다.
+   */
+  height: calc(var(--bomb-bar) + var(--bomb-headroom));
+  margin-top: calc(-1 * var(--bomb-headroom));
+  padding-top: var(--bomb-headroom);
+  overflow: hidden;
+  pointer-events: none;
+  transition:
+    --bomb-rope-a 0.3s ease-out,
+    --bomb-rope-b 0.3s ease-out,
+    --bomb-flame-outer 0.3s ease-out,
+    --bomb-flame-inner 0.3s ease-out;
+}
+
+/* 마지막 20%: 붉은 톤 + 불꽃이 더 빠르고 격하게 깜빡인다 */
+.bomb-timer[data-urgent] {
+  --bomb-rope-a: #ff6b6b;
+  --bomb-rope-b: #8c1d2b;
+  --bomb-flame-outer: #ff4757;
+  --bomb-flame-inner: #ffb347;
+  --bomb-flicker-outer: 0.1s;
+  --bomb-flicker-inner: 0.1s;
+  --bomb-spark-scale: 0.65;
+}
+
+/* ── 탄 자리 ───────────────────────────────────────────────────────────── */
+.bomb-bar {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: var(--bomb-bar);
+  box-sizing: border-box;
+  border-top: 4px solid rgba(0, 0, 0, 0.6);
+  background-color: #0b0710;
+  background-image:
+    /* 회색 잔재 점 — 타일 크기를 서로 다르게 둬 불규칙하게 보이게 */
+    radial-gradient(circle at 30% 45%, rgba(190, 190, 200, 0.55) 0 1.2px, transparent 1.9px),
+    radial-gradient(circle at 72% 70%, rgba(150, 150, 160, 0.45) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 15% 78%, rgba(210, 210, 220, 0.35) 0 0.8px, transparent 1.4px),
+    /* 그을린 얼룩 */
+    linear-gradient(180deg, rgba(70, 45, 45, 0.55), rgba(0, 0, 0, 0.92));
+  background-size:
+    23px 17px,
+    31px 13px,
+    19px 11px,
+    100% 100%;
+}
+
+/* ── 남은 도화선 ───────────────────────────────────────────────────────── */
+.bomb-fuse {
+  position: absolute;
+  left: 0;
+  bottom: 5px;
+  height: 14px;
+  border-radius: 0 7px 7px 0;
+  background-color: var(--bomb-rope-b);
+  background-image:
+    /* 위는 밝고 아래는 어두운 둥근 밧줄 음영 */
+    linear-gradient(180deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0) 45%, rgba(0, 0, 0, 0.4)),
+    /* 꼬인 줄무늬 — 14px 정방형 타일의 대각 스트라이프라 폭이 줄어도 왼쪽에 고정된 채 미끄러지지 않는다 */
+    linear-gradient(
+      135deg,
+      var(--bomb-rope-a) 25%,
+      var(--bomb-rope-b) 25%,
+      var(--bomb-rope-b) 50%,
+      var(--bomb-rope-a) 50%,
+      var(--bomb-rope-a) 75%,
+      var(--bomb-rope-b) 75%
+    );
+  background-size:
+    100% 100%,
+    14px 14px;
+  background-repeat: no-repeat, repeat;
+  box-shadow:
+    inset 0 -2px 0 rgba(0, 0, 0, 0.35),
+    0 2px 0 rgba(0, 0, 0, 0.5);
+}
+
+/* ── 불꽃 컨테이너 ─────────────────────────────────────────────────────── */
+.bomb-head {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: var(--bomb-bar);
+}
+
+/* 도화선 끝에서 오른쪽으로 번진 새 그을음 (children 아래에 그려지도록 ::before) */
+.bomb-head::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 4px;
+  width: 36px;
+  height: 16px;
+  background: linear-gradient(90deg, rgba(25, 8, 8, 0.95), rgba(25, 8, 8, 0));
+}
+
+.bomb-ember {
+  position: absolute;
+  left: -4px;
+  bottom: 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff5c2 0 1px, #ffb347 2.5px, #ff4757 4px);
+  box-shadow:
+    0 0 6px 2px rgba(255, 140, 40, 0.85),
+    0 0 14px 4px rgba(255, 80, 40, 0.45);
+  animation: bomb-ember-glow 0.3s ease-in-out infinite alternate;
+}
+
+.bomb-flame {
+  position: absolute;
+  left: 0;
+  fill: currentColor;
+  transform-origin: 50% 100%;
+  will-change: transform, opacity;
+}
+.bomb-flame--outer {
+  width: 30px;
+  height: 30px;
+  margin-left: -15px;
+  bottom: 7px;
+  color: var(--bomb-flame-outer);
+  stroke: rgba(120, 30, 0, 0.55);
+  stroke-width: 1.5;
+  filter: drop-shadow(0 0 5px rgba(255, 140, 30, 0.75));
+  animation: bomb-flicker-outer var(--bomb-flicker-outer) ease-in-out infinite alternate;
+}
+.bomb-flame--inner {
+  width: 16px;
+  height: 16px;
+  margin-left: -8px;
+  bottom: 8px;
+  color: var(--bomb-flame-inner);
+  stroke: none;
+  animation: bomb-flicker-inner var(--bomb-flicker-inner) ease-in-out infinite alternate;
+}
+
+/* 스파크: 각 요소가 인라인 style 로 --bomb-dx/--bomb-dy/--bomb-delay/--bomb-dur 를 받는다 */
+.bomb-spark {
+  position: absolute;
+  left: -1.5px;
+  bottom: 11px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #ffe9a3;
+  box-shadow: 0 0 4px 1px rgba(255, 200, 80, 0.9);
+  opacity: 0;
+  will-change: transform, opacity;
+  animation: bomb-spark calc(var(--bomb-dur, 0.6s) * var(--bomb-spark-scale)) ease-out var(--bomb-delay, 0s)
+    infinite;
+}
+.bomb-timer[data-urgent] .bomb-spark {
+  background: #ffb3a0;
+  box-shadow: 0 0 4px 1px rgba(255, 90, 60, 0.9);
+}
+
+/* ── 펑 (exploded) — RESULT 동안 유지되므로 forwards 로 한 번만 ─────────── */
+.bomb-pop {
+  position: absolute;
+  left: -8px;
+  bottom: 4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffffff 0 30%, #ffb347 60%, rgba(255, 71, 87, 0) 100%);
+  animation: bomb-pop 0.4s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+}
+.bomb-shard {
+  position: absolute;
+  left: -2px;
+  bottom: 10px;
+  width: 4px;
+  height: 4px;
+  border-radius: 1px;
+  background: #ffd60a;
+  box-shadow: 0 0 3px rgba(255, 200, 80, 0.8);
+  animation: bomb-shard 0.45s ease-out forwards;
+}
+.bomb-timer[data-state='popped'] .bomb-bar {
+  animation: bomb-bar-flash 0.4s ease-out forwards;
+}
+
+/* ── keyframes ─────────────────────────────────────────────────────────── */
+@keyframes bomb-flicker-outer {
+  from {
+    transform: scale(0.9, 0.92) rotate(-7deg);
+    opacity: 0.85;
+  }
+  to {
+    transform: scale(1.08, 1.15) rotate(7deg);
+    opacity: 1;
+  }
+}
+@keyframes bomb-flicker-inner {
+  from {
+    transform: translateY(1px) scale(0.8) rotate(6deg);
+    opacity: 0.9;
+  }
+  to {
+    transform: translateY(-2px) scale(1.15) rotate(-6deg);
+    opacity: 1;
+  }
+}
+@keyframes bomb-ember-glow {
+  from {
+    transform: scale(0.9);
+    filter: brightness(0.9);
+  }
+  to {
+    transform: scale(1.15);
+    filter: brightness(1.3);
+  }
+}
+/* 위로 튀어 오르다 살짝 떨어지며 꺼진다 */
+@keyframes bomb-spark {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  55% {
+    transform: translate(calc(var(--bomb-dx) * 0.6), var(--bomb-dy)) scale(0.8);
+    opacity: 0.95;
+  }
+  100% {
+    transform: translate(var(--bomb-dx), calc(var(--bomb-dy) * 0.45)) scale(0.2);
+    opacity: 0;
+  }
+}
+@keyframes bomb-pop {
+  0% {
+    transform: scale(0.3);
+    opacity: 1;
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    transform: scale(5);
+    opacity: 0;
+  }
+}
+@keyframes bomb-shard {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--bomb-dx), var(--bomb-dy)) rotate(220deg);
+    opacity: 0;
+  }
+}
+@keyframes bomb-bar-flash {
+  0% {
+    filter: brightness(2.2);
+  }
+  100% {
+    filter: brightness(1);
+  }
+}
+
+/* ── 움직임 줄이기: 스파크·깜빡임은 끄고 불꽃은 정지, 펑은 정적인 링으로 ─── */
+@media (prefers-reduced-motion: reduce) {
+  .bomb-timer {
+    transition: none;
+  }
+  .bomb-flame,
+  .bomb-ember {
+    animation: none;
+  }
+  .bomb-spark,
+  .bomb-shard {
+    display: none;
+  }
+  .bomb-pop {
+    animation: none;
+    transform: scale(3);
+    opacity: 0.7;
+  }
+  .bomb-timer[data-state='popped'] .bomb-bar {
+    animation: none;
+  }
+}

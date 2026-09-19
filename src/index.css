@@ -1,0 +1,76 @@
+@import "tailwindcss";
+@import "./styles/fx.css";
+@import "./styles/bomb.css";
+@import "./styles/speedup.css";
+@import "./styles/games.css";
+
+@theme {
+  --color-rush-bg: #1a0b2e;
+  --color-rush-panel: #2a1550;
+  --color-rush-yellow: #ffd60a;
+  --color-rush-pink: #ff2d95;
+  --color-rush-cyan: #00e5ff;
+  --color-rush-green: #2dd881;
+  --color-rush-red: #ff4757;
+
+  /* 지시어 · 결과 텍스트가 튀어나오는 팝 */
+  --animate-pop: pop 0.45s cubic-bezier(0.2, 1.6, 0.4, 1) both;
+  /* "PRESS SPACE" 같은 대기 안내 */
+  --animate-blink: blink 1s steps(1, end) infinite;
+  /* SPEED UP! 배경 줄무늬가 흐른다 */
+  --animate-stripes: stripes 0.6s linear infinite;
+  /* 신호등이 초록으로 바뀔 때 한 번 번쩍 */
+  --animate-flash: flash 0.5s ease-out both;
+
+  @keyframes pop {
+    0% {
+      transform: scale(0.2) rotate(-6deg);
+      opacity: 0;
+    }
+    60% {
+      transform: scale(1.12) rotate(2deg);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1) rotate(0);
+      opacity: 1;
+    }
+  }
+  @keyframes blink {
+    0%, 60% { opacity: 1; }
+    61%, 100% { opacity: 0.15; }
+  }
+  @keyframes stripes {
+    from { background-position: 0 0; }
+    to { background-position: 80px 0; }
+  }
+  @keyframes flash {
+    0% { filter: brightness(3); }
+    100% { filter: brightness(1); }
+  }
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-rush-bg);
+  color: #fff;
+  font-family: "Pretendard", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-stripes,
+  .animate-blink {
+    animation: none;
+  }
+}
