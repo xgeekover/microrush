@@ -47,7 +47,7 @@ export const MICROGAMES: readonly MicrogameDefinition[] = [
     id: 'clean-screen',
     verb: '닦아!',
     description: '김 서린 창문을 문질러 80% 이상 닦아낸다',
-    duration: 3.5,
+    duration: 4.0,
     component: CleanScreen,
   },
   {

@@ -5,8 +5,9 @@ import type { MicrogameProps } from '../types';
 
 /*
  * 닦아! — 김 서린 창문을 마우스로 문질러 80% 이상 걷어낸다.
- * 커서가 지나간 타일이 지워진다(누를 필요 없음 · 터치는 드래그). 빠르게 휘두르면 타일을 건너뛰므로
- * 직전 위치와 현재 위치 사이를 20px 간격으로 보간해 그 사이 타일도 지운다. 궤적에는 반짝임이 남는다.
+ * 커서가 지나간 자리가 지워진다(누를 필요 없음 · 터치는 드래그). 걸레 반경(화면 짧은 변의 14%) 안에
+ * 걸리는 타일은 한꺼번에 지워지므로 폰에서도 두세 번 스윕이면 된다. 빠르게 휘두르면 타일을 건너뛰므로
+ * 직전 위치와 현재 위치 사이를 20px 간격으로 보간해 그 사이도 지운다. 궤적에는 반짝임이 남는다.
  */
 
 const COLS = 5;
@@ -14,6 +15,8 @@ const ROWS = 4;
 const TOTAL = COLS * ROWS;
 const CLEAR_RATIO = 0.8;
 const MAX_SPARKLES = 24;
+/** 걸레 반경 — 필드의 짧은 변 대비 */
+const BRUSH_RATIO = 0.14;
 
 interface Sparkle {
   id: number;
@@ -33,13 +36,23 @@ export function CleanScreen({ onSuccess, onFail }: MicrogameProps) {
 
   const count = cleared.filter(Boolean).length;
 
-  const wipeAt = (nx: number, ny: number) => {
-    // nx, ny: 0~1 필드 비율 좌표
-    if (nx < 0 || nx >= 1 || ny < 0 || ny >= 1) return;
-    const idx = Math.floor(ny * ROWS) * COLS + Math.floor(nx * COLS);
-    if (clearedRef.current[idx]) return;
-    const next = clearedRef.current.slice();
-    next[idx] = true;
+  const wipeAt = (x: number, y: number, width: number, height: number) => {
+    // x, y: 필드 px 좌표. 걸레 원과 겹치는 타일을 전부 지운다
+    const r = BRUSH_RATIO * Math.min(width, height);
+    const tw = width / COLS;
+    const th = height / ROWS;
+    let next: boolean[] | null = null;
+    for (let i = 0; i < TOTAL; i++) {
+      if (clearedRef.current[i]) continue;
+      const left = (i % COLS) * tw;
+      const top = Math.floor(i / COLS) * th;
+      const cx = Math.max(left, Math.min(left + tw, x));
+      const cy = Math.max(top, Math.min(top + th, y));
+      if ((cx - x) ** 2 + (cy - y) ** 2 > r * r) continue;
+      if (!next) next = clearedRef.current.slice();
+      next[i] = true;
+    }
+    if (!next) return;
     clearedRef.current = next;
     setCleared(next);
     if (next.filter(Boolean).length >= Math.ceil(TOTAL * CLEAR_RATIO)) finish(true);
@@ -59,10 +72,10 @@ export function CleanScreen({ onSuccess, onFail }: MicrogameProps) {
       const steps = Math.min(40, Math.ceil(dist / 20));
       for (let i = 1; i <= steps; i++) {
         const t = i / steps;
-        wipeAt((prev.x + (x - prev.x) * t) / rect.width, (prev.y + (y - prev.y) * t) / rect.height);
+        wipeAt(prev.x + (x - prev.x) * t, prev.y + (y - prev.y) * t, rect.width, rect.height);
       }
     } else {
-      wipeAt(x / rect.width, y / rect.height);
+      wipeAt(x, y, rect.width, rect.height);
     }
     // 반짝임: 40ms 에 하나, 최대 24개
     const now = performance.now();

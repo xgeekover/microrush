@@ -5,13 +5,17 @@ import type { MicrogameProps } from '../types';
 
 /*
  * 점프! — 줄이 발밑을 지나는 순간 공중에 있어야 한다.
- * 줄은 1.1초(÷배율)에 한 바퀴 돌고 첫 바퀴의 3/4 지점에서 처음 발밑을 지난다. 그 순간
- * 점프 중(공중 320ms)이면 성공, 땅에 있으면 걸려 넘어져 즉시 실패. 판정은 첫 통과에서 한 번 난다.
- * 타이밍 창은 곧 공중 시간이다 — 줄이 오기 320ms 안쪽에 뛰어야 한다.
+ * 줄은 1.35초(÷배율)에 한 바퀴 돌고 첫 바퀴의 3/4 지점에서 처음 발밑을 지난다. 그 순간
+ * 점프 중(공중 450ms)이면 성공, 땅에 있으면 걸려 넘어져 즉시 실패. 판정은 첫 통과에서 한 번 난다.
+ * 타이밍 창은 곧 공중 시간이다 — 줄이 오기 450ms 안쪽에 뛰어야 한다.
+ * 줄이 마지막 1/4 바퀴(발밑 90° 앞)에 들어오면 발밑 링이 켜지고 줄이 밝아진다 — 폰에서는 이 예고가 없으면
+ * 터치 지연(~80ms)과 반응 시간을 빼고 남는 창이 거의 없다.
  */
 
-const PERIOD_S = 1.1;
-const AIR_MS = 320;
+const PERIOD_S = 1.35;
+const AIR_MS = 450;
+/** 이 각도(도, 발밑까지 남은 각)부터 "지금!" 예고 */
+const CUE_DEG = 100;
 /** 시작 각도(도). 0 = 발밑. 90 에서 시작해 270° 돌면 처음 발밑 */
 const START_DEG = 90;
 
@@ -23,6 +27,8 @@ export function JumpRope({ onSuccess, onFail, speedMultiplier }: MicrogameProps)
   const lastAngle = useRef(START_DEG);
 
   const period = PERIOD_S / speedMultiplier;
+  /** 발밑까지 남은 각도. 예고 구간이면 true */
+  const cue = !done && 360 - angle <= CUE_DEG;
 
   useFrameLoop((_dt, elapsed) => {
     if (isDone()) return;
@@ -50,6 +56,7 @@ export function JumpRope({ onSuccess, onFail, speedMultiplier }: MicrogameProps)
       data-testid="game-jump-rope"
       data-rope-angle={angle.toFixed(0)}
       data-airborne={airborne}
+      data-cue={cue}
       data-done={done ?? ''}
       onPointerDown={jump}
       className="relative flex h-full w-full cursor-pointer flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-teal-800 to-teal-950"
@@ -59,10 +66,18 @@ export function JumpRope({ onSuccess, onFail, speedMultiplier }: MicrogameProps)
       </p>
 
       <div className="relative flex size-72 items-center justify-center sm:size-80">
-        {/* 줄: 원의 아랫쪽 호만 보이는 링을 회전시킨다. 각도 0 = 호가 발밑 */}
+        {/* 줄: 원의 아랫쪽 호만 보이는 링을 회전시킨다. 각도 0 = 호가 발밑. 예고 구간이면 밝아진다 */}
         <div
-          className="absolute inset-0 rounded-full border-[6px] border-transparent border-b-amber-200 drop-shadow-[0_0_6px_rgba(0,0,0,0.6)]"
+          className={`absolute inset-0 rounded-full border-[8px] border-transparent transition-colors ${
+            cue ? 'border-b-rush-yellow drop-shadow-[0_0_14px_rgba(255,214,10,0.9)]' : 'border-b-amber-200 drop-shadow-[0_0_6px_rgba(0,0,0,0.6)]'
+          }`}
           style={{ transform: `rotate(${angle}deg)` }}
+        />
+        {/* 발밑 링: 줄이 가까워지면 켜진다 — "지금 뛰어!" */}
+        <div
+          className={`pointer-events-none absolute bottom-2 h-6 w-36 rounded-[50%] border-4 transition-opacity ${
+            cue ? 'animate-[fx-cue_0.25s_ease-in-out_infinite_alternate] border-rush-yellow opacity-100' : 'border-white/20 opacity-40'
+          }`}
         />
         {/* 손잡이 */}
         <div className="absolute inset-0" style={{ transform: `rotate(${angle}deg)` }}>

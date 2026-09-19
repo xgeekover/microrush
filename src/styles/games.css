@@ -31,6 +31,12 @@
   to { transform: translateY(-12px) rotate(6deg); }
 }
 
+/* 점프!: 줄이 발밑에 가까워질 때 발밑 링이 맥동한다 */
+@keyframes fx-cue {
+  from { transform: scale(0.92); opacity: 0.7; }
+  to { transform: scale(1.08); opacity: 1; }
+}
+
 /* 닦아!: 궤적의 반짝임 — 커졌다 사라진다 */
 .fx-sparkle {
   color: #fff;
