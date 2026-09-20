@@ -6,7 +6,7 @@ import { HUD } from '../components/HUD';
 import { Lobby } from '../components/Lobby';
 import { SpeedUpBanner } from '../components/SpeedUpBanner';
 import { VerbBanner } from '../components/VerbBanner';
-import { pickNextGame } from '../games/registry';
+import { MICROGAMES, pickNextGame } from '../games/registry';
 import type { MicrogameDefinition, Outcome } from '../games/types';
 import { RUSH, playDurationMs, speedMultiplierFor } from './config';
 import { SoundManager } from './SoundManager';
@@ -53,6 +53,15 @@ type Action =
   | { type: 'RESOLVE'; outcome: Outcome; ratio: number; timedOut?: boolean }
   | { type: 'RESULT_DONE'; nextGame: MicrogameDefinition }
   | { type: 'SPEED_UP_DONE' };
+
+/**
+ * 개발 빌드에서만: URL 의 ?game=<id> 로 특정 게임만 나오게 한다 (디자인 · 검증 반복용).
+ * 프로덕션 번들에서는 상수 null 로 접혀 사라진다.
+ */
+const FORCED_GAME: MicrogameDefinition | null = import.meta.env.DEV
+  ? (MICROGAMES.find((g) => g.id === new URLSearchParams(window.location.search).get('game')) ?? null)
+  : null;
+const pickGame = (recent: readonly string[]): MicrogameDefinition => FORCED_GAME ?? pickNextGame(recent);
 
 function initialState(): RushState {
   return {
@@ -132,7 +141,7 @@ export function GameController() {
 
   const start = useCallback(() => {
     sound.unlock();
-    dispatch({ type: 'START', game: pickNextGame([]) });
+    dispatch({ type: 'START', game: pickGame([]) });
   }, [sound]);
   const toLobby = useCallback(() => dispatch({ type: 'LOBBY' }), []);
 
@@ -219,7 +228,7 @@ export function GameController() {
       }
     }
     const t = window.setTimeout(
-      () => dispatch({ type: 'RESULT_DONE', nextGame: pickNextGame(recent) }),
+      () => dispatch({ type: 'RESULT_DONE', nextGame: pickGame(recent) }),
       RUSH.resultMs,
     );
     return () => window.clearTimeout(t);

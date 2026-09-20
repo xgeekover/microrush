@@ -67,3 +67,99 @@
 @media (prefers-reduced-motion: reduce) {
   .fx-sparkle { animation: none; opacity: 0; }
 }
+
+/* 뽑아!: 흙 — 어두워지는 세로 그라데이션 위에 크기가 다른 자갈 점 두 겹, 표면은 살짝 밝은 띠 */
+.pluck-soil {
+  background-color: #6b4423;
+  background-image:
+    linear-gradient(180deg, rgba(255, 220, 160, 0.35) 0, rgba(255, 220, 160, 0) 14px),
+    radial-gradient(circle at 30% 40%, rgba(255, 230, 190, 0.22) 0 1.5px, transparent 2.4px),
+    radial-gradient(circle at 70% 65%, rgba(0, 0, 0, 0.3) 0 1.8px, transparent 2.8px),
+    radial-gradient(circle at 15% 80%, rgba(255, 210, 150, 0.14) 0 1px, transparent 1.8px),
+    linear-gradient(180deg, #8b5a2b 0%, #6b4423 40%, #45301a 100%);
+  background-size:
+    100% 100%,
+    29px 23px,
+    41px 31px,
+    17px 13px,
+    100% 100%;
+  box-shadow: inset 0 6px 0 rgba(0, 0, 0, 0.18);
+}
+
+/* ── 돌려! — 배관실과 핸드휠 (접두어 crank- · tc-) ─────────────────────────── */
+/* 벽: 어두운 타일 줄눈 + 위쪽 조명 */
+.crank-room {
+  background-color: #2a313c;
+  background-image:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.12), transparent 60%),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.35) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.35) 1px, transparent 1px),
+    linear-gradient(180deg, #343c48, #1c2129);
+  background-size:
+    100% 100%,
+    64px 64px,
+    64px 64px,
+    100% 100%;
+}
+.crank-wheel {
+  filter: drop-shadow(0 16px 18px rgba(0, 0, 0, 0.55));
+}
+/* 테: 붉은 도장 위에 마모된 하이라이트. 안쪽은 비워 링처럼 보인다 */
+.crank-rim {
+  background: radial-gradient(circle at 35% 30%, #ff9a9a 0, #d7262b 38%, #8c1418 70%, #5a0c10 100%);
+  -webkit-mask: radial-gradient(circle, transparent 0 62%, #000 63%);
+  mask: radial-gradient(circle, transparent 0 62%, #000 63%);
+}
+.crank-spoke {
+  border-radius: 999px;
+  background: linear-gradient(90deg, #7a1014, #e23a3f 45%, #ff8f8f 55%, #a4181c);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.25);
+}
+.crank-hub {
+  background: radial-gradient(circle at 40% 35%, #ea4b4f, #9c1a1e 60%, #5e0e11);
+  box-shadow:
+    inset 0 -4px 8px rgba(0, 0, 0, 0.45),
+    0 2px 0 rgba(0, 0, 0, 0.4);
+}
+/* 육각 너트 (황동) */
+.crank-nut {
+  clip-path: polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+  background: linear-gradient(180deg, #f3d98a, #b8862f 55%, #6b4a12);
+}
+/* 위에서 오는 빛의 반사 — 회전과 함께 돌지 않게 wheel 안에서 마지막에 겹친다 */
+.crank-gloss {
+  background:
+    radial-gradient(circle at 35% 22%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 32%),
+    radial-gradient(circle at 70% 80%, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0) 40%);
+  -webkit-mask: radial-gradient(circle, transparent 0 62%, #000 63%);
+  mask: radial-gradient(circle, transparent 0 62%, #000 63%);
+}
+/* 물줄기 · 웅덩이 · 물방울 */
+.tc-stream {
+  transform-origin: 366px 254px;
+  animation: tc-stream 0.35s ease-out both;
+}
+.tc-puddle {
+  transform-origin: 347px 320px;
+  animation: tc-puddle 0.6s ease-out 0.25s both;
+}
+.tc-splash {
+  transform-origin: 366px 312px;
+  animation: tc-splash 0.5s ease-out 0.3s both;
+}
+@keyframes tc-stream {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+@keyframes tc-puddle {
+  from { transform: scaleX(0.2); opacity: 0; }
+  to { transform: scaleX(1); opacity: 1; }
+}
+@keyframes tc-splash {
+  0% { transform: translateY(0) scale(0.6); opacity: 0; }
+  40% { transform: translateY(-22px) scale(1); opacity: 1; }
+  100% { transform: translateY(2px) scale(0.5); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tc-stream, .tc-puddle, .tc-splash { animation: none; }
+}

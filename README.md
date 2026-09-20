@@ -19,6 +19,8 @@ npm run build    # tsc -b && vite build
 npm run lint     # oxlint
 ```
 
+개발 서버에서만 `?game=<id>` 로 특정 마이크로게임만 나오게 할 수 있다 (`http://localhost:5173/?game=pluck-root`). 그림을 고치거나 봇으로 검증할 때 그 게임이 뽑힐 때까지 기다리지 않아도 된다. 프로덕션 번들에서는 사라진다.
+
 ### 배포
 
 `main` 에 push 하면 GitHub Actions(`.github/workflows/deploy.yml`)가 린트 → 빌드 → GitHub Pages 배포까지 한다. Pages 는 `https://<user>.github.io/microrush/` 하위 경로에서 서빙되므로 `vite.config.ts` 의 `base` 가 상대 경로(`./`)다.
@@ -86,6 +88,10 @@ LOBBY ─시작─▶ READY(지시어 0.6s) ─▶ PLAYING(3~4s ÷ 템포) ─�
 - `prefers-reduced-motion` 에서는 쉐이크 · 파티클 이동 · 줄무늬 · 깜빡임을 끄고 팝업만 남긴다.
 
 ## 마이크로게임 17종
+
+<p align="center"><img src="docs/pluck.jpg" width="49%" alt="뽑아! — 흙에서 무가 드러나는 중" /> <img src="docs/crank.jpg" width="49%" alt="돌려! — 밸브를 다 돌려 물이 쏟아진다" /></p>
+
+장면은 전부 SVG · CSS 로 그린다(외부 이미지 없음). **뽑아!** 는 하늘 · 언덕 · 질감 있는 흙 · 풀 위에 SVG 무가 박혀 있고, 땅 아래는 `clip-path` 로 가려 두었다가 당기는 만큼 드러난다(구멍과 금도 같이 벌어진다). **돌려!** 는 배관실 벽 · 플랜지 · 밸브 보닛 · 압력계 · 팔꿈치 꼭지 · 배수 그레이팅 위에 CSS 핸드휠이 돌고, 압력계 바늘이 돌린 만큼 오르다가 두 바퀴를 채우면 꼭지에서 물이 쏟아진다.
 
 | 지시어 | 파일 | 조작 | 판정 |
 |---|---|---|---|
