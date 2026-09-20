@@ -42,6 +42,11 @@ export function PourDrink({ onSuccess, onFail, speedMultiplier }: MicrogameProps
   const overflow = done === 'fail' && level >= 100;
   const short = done === 'fail' && level < TARGET_MIN;
 
+  // 유리잔 안쪽: SVG y 70(테두리) → 330(바닥), 260 높이. level% → 주스 윗면 y
+  const topY = 330 - 2.6 * Math.min(100, level);
+  const lineY = (pct: number) => 330 - 2.6 * pct;
+  const BUBBLES = [72, 88, 104, 120, 132];
+
   return (
     <div
       data-testid="game-pour-drink"
@@ -50,41 +55,64 @@ export function PourDrink({ onSuccess, onFail, speedMultiplier }: MicrogameProps
       data-target-max={TARGET_MAX}
       data-done={done ?? ''}
       onPointerDown={stop}
-      className="relative flex h-full w-full cursor-pointer flex-col items-center justify-end overflow-hidden bg-gradient-to-b from-rose-950 to-rush-bg pb-[8%]"
+      className="kitchen relative flex h-full w-full cursor-pointer flex-col items-center justify-end overflow-hidden"
     >
-      <Instruction>점선까지 채워!</Instruction>
+      <Instruction>MAX 와 MIN 사이에서 멈춰!</Instruction>
+      {/* 조리대 */}
+      <div aria-hidden className="counter-top absolute inset-x-0 bottom-0 h-[14%]" />
 
-      {/* 주스 줄기 (멈추면 사라진다) */}
-      {!stopped && (
-        <div className="absolute left-1/2 top-[14%] h-[45%] w-5 -translate-x-1/2 rounded-b-full bg-orange-400 shadow-[0_0_18px_rgba(251,146,60,0.8)]" />
-      )}
-      {/* 주전자 입 */}
-      <div className="absolute left-1/2 top-[8%] h-10 w-28 -translate-x-1/2 rounded-b-3xl border-4 border-black/40 bg-slate-300" />
+      <svg viewBox="0 0 200 360" className="relative mb-[6%] h-[80%] max-h-[560px] overflow-visible drop-shadow-[0_18px_22px_rgba(0,0,0,0.3)]" aria-hidden>
+        <defs>
+          <linearGradient id="pd-chrome" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#f3f4f6" /><stop offset="0.5" stopColor="#9ca3af" /><stop offset="1" stopColor="#4b5563" /></linearGradient>
+          <linearGradient id="pd-juice" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#ffb547" /><stop offset="1" stopColor="#f97316" /></linearGradient>
+          <linearGradient id="pd-glass" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="rgba(255,255,255,0.55)" /><stop offset="0.25" stopColor="rgba(255,255,255,0.05)" /><stop offset="0.8" stopColor="rgba(255,255,255,0.05)" /><stop offset="1" stopColor="rgba(255,255,255,0.45)" /></linearGradient>
+          <clipPath id="pd-inner"><path d="M46 70 L154 70 L146 322 Q100 338 54 322 Z" /></clipPath>
+        </defs>
 
-      {/* 컵 */}
-      <div className="relative h-[58%] w-52 overflow-hidden rounded-b-[2.5rem] rounded-t-xl border-x-[6px] border-b-[10px] border-white/70 bg-white/10 shadow-[inset_0_0_30px_rgba(255,255,255,0.15)] sm:w-60">
-        {/* 타겟 점선 */}
-        <div className="absolute inset-x-0 z-10 border-t-4 border-dashed border-rush-yellow" style={{ bottom: `${TARGET_MAX}%` }} />
-        <div className="absolute inset-x-0 z-10 border-t-4 border-dashed border-rush-yellow" style={{ bottom: `${TARGET_MIN}%` }} />
-        <div
-          className="absolute inset-x-0 z-0 bg-rush-yellow/15"
-          style={{ bottom: `${TARGET_MIN}%`, height: `${TARGET_MAX - TARGET_MIN}%` }}
-        />
+        {/* 디스펜서 꼭지 */}
+        <rect x="60" y="0" width="80" height="18" rx="6" fill="url(#pd-chrome)" />
+        <rect x="90" y="16" width="20" height="26" rx="4" fill="url(#pd-chrome)" stroke="#374151" strokeWidth="1" />
+        <rect x="84" y="40" width="32" height="8" rx="3" fill="#374151" />
+
+        {/* 주스 줄기 (멈추면 사라진다) */}
+        {!stopped && (
+          <g>
+            <rect x="93" y="48" width="14" height={Math.max(0, topY - 48)} rx="7" fill="url(#pd-juice)" opacity="0.95" />
+            <ellipse cx="100" cy={topY} rx="22" ry="5" fill="#ffd29a" opacity="0.8" />
+          </g>
+        )}
+
+        {/* 유리잔 뒤판 (투명 유리) */}
+        <path d="M46 70 L154 70 L146 322 Q100 338 54 322 Z" fill="rgba(255,255,255,0.18)" />
         {/* 주스 */}
-        <div
-          className={`absolute inset-x-0 bottom-0 bg-gradient-to-t from-orange-500 to-orange-400 ${
-            done === 'success' ? 'shadow-[0_0_40px_rgba(251,146,60,0.9)]' : ''
-          }`}
-          style={{ height: `${Math.min(100, level)}%` }}
-        >
-          <div className={`absolute -top-2 inset-x-0 h-4 rounded-[50%] bg-orange-300 ${stopped ? '' : 'animate-[fx-wave_0.5s_ease-in-out_infinite_alternate]'}`} />
-        </div>
-      </div>
+        <g clipPath="url(#pd-inner)">
+          <rect x="40" y={topY} width="120" height={360 - topY} fill="url(#pd-juice)" className={done === 'success' ? 'drop-shadow-[0_0_16px_rgba(251,146,60,0.9)]' : ''} />
+          <ellipse cx="100" cy={topY} rx="58" ry="6" fill="#ffd29a" className={stopped ? '' : 'animate-[fx-wave_0.5s_ease-in-out_infinite_alternate]'} />
+          {!stopped && BUBBLES.map((x, i) => <circle key={x} cx={x} cy="320" r={2 + (i % 3)} fill="rgba(255,255,255,0.7)" className="pd-bubble" style={{ animationDelay: `${i * 0.3}s` }} />)}
+        </g>
+        {/* 목표선 — 유리에 새긴 눈금 */}
+        {[TARGET_MIN, TARGET_MAX].map((pct, i) => (
+          <g key={pct}>
+            <line x1="52" y1={lineY(pct)} x2="150" y2={lineY(pct)} stroke={done === 'fail' ? '#ff4d67' : '#ffd60a'} strokeWidth="3" strokeDasharray="8 5" />
+            <text x="158" y={lineY(pct) + 4} fontSize="11" fontWeight="800" fill="#374151">{i ? 'MAX' : 'MIN'}</text>
+          </g>
+        ))}
+        <rect x="52" y={lineY(TARGET_MAX)} width="98" height={lineY(TARGET_MIN) - lineY(TARGET_MAX)} fill="rgba(255,214,10,0.12)" />
+        {/* 유리 앞판 · 테두리 · 하이라이트 · 두꺼운 바닥 */}
+        <path d="M46 70 L154 70 L146 322 Q100 338 54 322 Z" fill="url(#pd-glass)" stroke="rgba(255,255,255,0.85)" strokeWidth="3" />
+        <path d="M54 322 Q100 338 146 322 L148 334 Q100 352 52 334 Z" fill="rgba(255,255,255,0.6)" stroke="rgba(255,255,255,0.9)" strokeWidth="2" />
+        <ellipse cx="100" cy="70" rx="54" ry="6" fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="3" />
+        <path d="M60 90 L57 300" stroke="rgba(255,255,255,0.7)" strokeWidth="5" strokeLinecap="round" />
 
-      {/* 넘침 */}
-      {overflow && (
-        <div className="pointer-events-none absolute inset-x-0 bottom-[6%] h-[10%] animate-pop rounded-t-[50%] bg-orange-400/80" />
-      )}
+        {/* 넘침 — 테두리 밖으로 흘러 조리대에 고인다 */}
+        {overflow && (
+          <g className="animate-pop">
+            <path d="M46 70 Q30 80 34 120 Q38 160 30 200 L44 200 L46 70 Z" fill="url(#pd-juice)" opacity="0.9" />
+            <path d="M154 70 Q170 80 166 130 Q162 170 172 200 L156 200 Z" fill="url(#pd-juice)" opacity="0.9" />
+            <ellipse cx="100" cy="350" rx="90" ry="9" fill="#f97316" opacity="0.8" />
+          </g>
+        )}
+      </svg>
 
       <Hint>{done === 'success' ? '완벽한 한 잔!' : overflow ? '넘쳤어!' : short ? '너무 적어…' : 'Space · 클릭 · 탭'}</Hint>
     </div>

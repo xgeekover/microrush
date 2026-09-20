@@ -1,6 +1,6 @@
-import { Smile, Weight } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import type { MicrogameProps, Outcome } from '../types';
+import { Person } from '../scenery';
 import { Hint, Instruction } from '../ui';
 
 /*
@@ -99,6 +99,9 @@ export function DodgeFall({ onSuccess, onFail, speedMultiplier }: MicrogameProps
     targetRef.current = (e.clientX - rect.left) / rect.width;
   };
 
+  // 착지 그림자: 쇳덩이가 내려올수록 진하고 작아진다 — "여기 떨어진다" 예고
+  const fallP = obj ? Math.max(0, Math.min(1, (obj.y + 0.15) / 1.0)) : 0;
+
   return (
     <div
       ref={fieldRef}
@@ -109,36 +112,60 @@ export function DodgeFall({ onSuccess, onFail, speedMultiplier }: MicrogameProps
       data-done={done ?? ''}
       onPointerMove={pointTo}
       onPointerDown={pointTo}
-      className="relative h-full w-full cursor-none touch-none overflow-hidden bg-gradient-to-b from-sky-900 to-rush-bg"
+      className="site-sky relative h-full w-full cursor-none touch-none overflow-hidden"
     >
       <Instruction>옆으로 피해!</Instruction>
 
-      {/* 바닥 */}
-      <div className="absolute inset-x-0 bottom-0 h-[6%] bg-rush-panel border-t-4 border-black/40" />
+      {/* 크레인 · 건물 · 바닥 */}
+      <svg viewBox="0 0 800 400" preserveAspectRatio="none" className="absolute inset-0 h-full w-full" aria-hidden>
+        <g fill="#1e1b3a">
+          <rect x="0" y="200" width="90" height="180" /><rect x="110" y="150" width="60" height="230" /><rect x="640" y="170" width="70" height="210" /><rect x="730" y="120" width="70" height="260" />
+        </g>
+        <g stroke="#f2b46b" strokeWidth="4" fill="none" opacity="0.9">
+          <path d="M60 0 v0 M60 20 h380" /><path d="M60 20 v-20" /><path d="M120 20 l40 -20 M180 20 l40 -20 M240 20 l40 -20 M300 20 l40 -20 M360 20 l40 -20" />
+        </g>
+        <rect x="0" y="376" width="800" height="24" fill="#3d3a48" />
+        <rect x="0" y="372" width="800" height="6" fill="#6b6780" />
+        <rect x="0" y="380" width="800" height="8" fill="url(#df-hazard)" />
+        <defs>
+          <pattern id="df-hazard" width="40" height="8" patternUnits="userSpaceOnUse"><rect width="40" height="8" fill="#f2b46b" /><path d="M0 8 L20 0 L40 0 L20 8 Z" fill="#1f2937" /></pattern>
+        </defs>
+      </svg>
 
-      {/* 쇳덩이 */}
-      {obj && (
+      {/* 착지 그림자 */}
+      {obj && !done && (
         <div
-          className="absolute flex -translate-x-1/2 items-center justify-center"
-          style={{ left: `${obj.x * 100}%`, top: `${obj.y * 100}%`, width: `${OBJECT_W * 100}%` }}
-        >
-          <Weight className="size-full text-slate-300 drop-shadow-[0_8px_0_rgba(0,0,0,0.5)]" strokeWidth={2.5} />
+          className="absolute h-[2.5%] -translate-x-1/2 rounded-[100%] bg-black"
+          style={{ left: `${obj.x * 100}%`, top: `${PLAYER_BOTTOM * 100 - 0.5}%`, width: `${OBJECT_W * 100 * (1.4 - fallP * 0.5)}%`, opacity: 0.15 + fallP * 0.55 }}
+        />
+      )}
+
+      {/* 쇳덩이 — 잔상 두 개가 위에 남는다 */}
+      {obj && (
+        <div className="absolute -translate-x-1/2" style={{ left: `${obj.x * 100}%`, top: `${obj.y * 100}%`, width: `${OBJECT_W * 100}%` }}>
+          {[0.5, 0.25].map((o, i) => (
+            <svg key={i} viewBox="0 0 100 100" className="absolute inset-x-0 top-0 w-full" style={{ opacity: o * 0.35, transform: `translateY(${-(i + 1) * 22}px) scaleX(${1 - (i + 1) * 0.08})` }} aria-hidden>
+              <path d="M22 40 H78 L92 92 H8 Z" fill="#7c8698" />
+            </svg>
+          ))}
+          <svg viewBox="0 0 100 100" className="relative w-full drop-shadow-[0_12px_10px_rgba(0,0,0,0.5)]" aria-hidden>
+            <defs>
+              <linearGradient id="df-iron" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#c9d2dd" /><stop offset="0.5" stopColor="#6b7684" /><stop offset="1" stopColor="#2b323d" /></linearGradient>
+            </defs>
+            <path d="M50 4 a11 11 0 1 1 -0.1 0 M50 14 a5 5 0 1 0 0.1 0" fill="none" stroke="#3b4350" strokeWidth="6" />
+            <path d="M22 40 H78 L92 92 H8 Z" fill="url(#df-iron)" stroke="#1f2937" strokeWidth="2" />
+            <text x="50" y="76" textAnchor="middle" fontSize="26" fontWeight="900" fill="#1f2937" fontFamily="var(--font-display)">1t</text>
+          </svg>
         </div>
       )}
 
-      {/* 플레이어 */}
+      {/* 플레이어: 안전모를 쓴 작업자 */}
       <div
-        className={`absolute flex -translate-x-1/2 items-center justify-center rounded-t-3xl rounded-b-lg border-4 border-black/40 ${
-          done === 'fail' ? 'bg-rush-red' : done === 'success' ? 'bg-rush-green' : 'bg-rush-yellow'
-        }`}
-        style={{
-          left: `${player * 100}%`,
-          top: `${PLAYER_TOP * 100}%`,
-          width: `${PLAYER_W * 100}%`,
-          height: `${(PLAYER_BOTTOM - PLAYER_TOP) * 100}%`,
-        }}
+        className="absolute -translate-x-1/2"
+        style={{ left: `${player * 100}%`, top: `${(PLAYER_TOP - 0.1) * 100}%`, width: `${PLAYER_W * 100}%`, height: `${(PLAYER_BOTTOM - PLAYER_TOP + 0.1) * 100}%` }}
       >
-        <Smile className="size-3/4 text-rush-bg" strokeWidth={2.5} />
+        <div className="absolute inset-x-[15%] -bottom-1 h-2 rounded-[100%] bg-black/35" />
+        <Person className={`h-full w-full transition-transform ${done === 'fail' ? 'rotate-90 scale-y-75' : ''}`} pose={done === 'fail' ? 'fall' : done === 'success' ? 'cheer' : 'stand'} shirt="#2563eb" hat="#facc15" />
       </div>
 
       <Hint>마우스 · 드래그 · ← → · A D</Hint>

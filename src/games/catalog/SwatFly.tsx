@@ -68,10 +68,11 @@ export function SwatFly({ onSuccess, onFail, speedMultiplier }: MicrogameProps) 
       data-testid="game-swat-fly"
       data-fly={cell}
       data-done={done ?? ''}
-      className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-lime-200 to-lime-400"
+      className="picnic relative flex h-full w-full flex-col items-center justify-center overflow-hidden"
     >
       <Instruction>파리를 잡아!</Instruction>
-      <div className="grid grid-cols-3 gap-2 sm:gap-3">
+      <div aria-hidden className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_40%,rgba(255,255,255,0.25),rgba(0,0,0,0.25)_80%)]" />
+      <div className="relative grid grid-cols-3 gap-3 sm:gap-4">
         {Array.from({ length: 9 }, (_, i) => {
           const here = i === cell;
           return (
@@ -82,17 +83,53 @@ export function SwatFly({ onSuccess, onFail, speedMultiplier }: MicrogameProps) 
               data-fly={here}
               aria-label={here ? '파리' : '빈 칸'}
               onPointerDown={() => swat(i)}
-              className={`relative flex size-20 items-center justify-center rounded-2xl border-4 text-5xl sm:size-24 sm:text-6xl ${
-                done === 'success' && here ? 'border-rush-green bg-rush-green/40' : 'border-lime-900/20 bg-white/40'
+              className={`relative flex size-20 items-center justify-center rounded-full shadow-[0_10px_18px_-8px_rgba(0,0,0,0.6),inset_0_-4px_8px_rgba(0,0,0,0.12)] transition sm:size-24 ${
+                done === 'success' && here ? 'bg-[radial-gradient(circle,#bbf7d0,#86efac_70%)] ring-4 ring-rush-green' : 'bg-[radial-gradient(circle_at_40%_35%,#ffffff,#f1f5f9_60%,#cbd5e1_100%)] ring-2 ring-slate-300/70 active:scale-95'
               }`}
             >
-              {here && <span className={done === 'success' ? '' : 'inline-block animate-[fx-jitter_0.15s_linear_infinite]'}>{done === 'success' ? '💥' : '🪰'}</span>}
-              {splat === i && !here && <span className="absolute text-3xl opacity-40">✋</span>}
+              <span aria-hidden className="absolute inset-[14%] rounded-full border-2 border-slate-300/70" />
+              {here && (done === 'success' ? <Splat /> : <Fly />)}
+              {splat === i && !here && <Swatter />}
             </button>
           );
         })}
       </div>
       <Hint>칸 탭 · 클릭 · 숫자 1~9</Hint>
     </div>
+  );
+}
+
+/** 파리 — 몸통 · 머리 · 날개(퍼덕임) · 다리. 칸 안에서 잘게 떨린다 */
+function Fly() {
+  return (
+    <svg viewBox="0 0 60 50" className="relative size-12 animate-[fx-jitter_0.15s_linear_infinite] drop-shadow-[0_4px_3px_rgba(0,0,0,0.35)] sm:size-14" aria-hidden>
+      <g style={{ transformBox: 'fill-box', transformOrigin: '100% 100%', animation: 'fx-wing 0.06s linear infinite alternate' }}>
+        <ellipse cx="18" cy="16" rx="16" ry="7" fill="rgba(200,220,255,0.7)" stroke="#94a3b8" strokeWidth="1" transform="rotate(-25 34 26)" />
+      </g>
+      <g style={{ transformBox: 'fill-box', transformOrigin: '0% 100%', animation: 'fx-wing 0.06s linear infinite alternate-reverse' }}>
+        <ellipse cx="42" cy="16" rx="16" ry="7" fill="rgba(200,220,255,0.7)" stroke="#94a3b8" strokeWidth="1" transform="rotate(25 26 26)" />
+      </g>
+      <path d="M22 34 l-8 8 M38 34 l8 8 M26 38 l-4 10 M34 38 l4 10" stroke="#111827" strokeWidth="1.8" strokeLinecap="round" />
+      <ellipse cx="30" cy="32" rx="12" ry="9" fill="#1f2937" />
+      <circle cx="30" cy="20" r="7" fill="#111827" />
+      <circle cx="26" cy="19" r="2.6" fill="#dc2626" /><circle cx="34" cy="19" r="2.6" fill="#dc2626" />
+    </svg>
+  );
+}
+function Swatter() {
+  return (
+    <svg viewBox="0 0 60 60" className="absolute size-14 animate-pop opacity-70" aria-hidden>
+      <rect x="14" y="6" width="32" height="32" rx="6" fill="#f472b6" stroke="#be185d" strokeWidth="2" />
+      <path d="M22 6 v32 M30 6 v32 M38 6 v32 M14 14 h32 M14 22 h32 M14 30 h32" stroke="#be185d" strokeWidth="1" opacity="0.7" />
+      <rect x="27" y="38" width="6" height="20" rx="3" fill="#7c2d12" />
+    </svg>
+  );
+}
+function Splat() {
+  return (
+    <svg viewBox="0 0 60 60" className="relative size-14 animate-pop" aria-hidden>
+      <path d="M30 6 l5 12 12-6-6 12 13 6-13 4 4 13-11-8-4 13-4-13-11 8 4-13-13-4 13-6-6-12 12 6z" fill="#16a34a" opacity="0.85" />
+      <circle cx="30" cy="30" r="8" fill="#052e16" />
+    </svg>
   );
 }

@@ -1,7 +1,7 @@
-import { PersonStanding } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useFrameLoop, useOutcome, usePressKey } from '../hooks';
 import type { MicrogameProps } from '../types';
+import { Cloud, Person, Sun } from '../scenery';
 import { Hint, Instruction } from '../ui';
 
 /*
@@ -60,45 +60,47 @@ export function JumpRope({ onSuccess, onFail, speedMultiplier }: MicrogameProps)
       data-cue={cue}
       data-done={done ?? ''}
       onPointerDown={jump}
-      className="relative flex h-full w-full cursor-pointer flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-teal-800 to-teal-950"
+      className="park-sky relative flex h-full w-full cursor-pointer flex-col items-center justify-center overflow-hidden"
     >
       <Instruction>줄이 발밑에 올 때 점프!</Instruction>
+      <Sun className="left-[10%] top-[8%] size-24" />
+      <Cloud className="right-[10%] top-[14%] w-40" />
+      <Cloud className="left-[30%] top-[22%] w-24 opacity-85" />
+      {/* 나무 · 울타리 · 마당 */}
+      <svg viewBox="0 0 800 400" preserveAspectRatio="none" className="absolute inset-0 h-full w-full" aria-hidden>
+        {[60, 180, 640, 760].map((x, i) => (
+          <g key={x}>
+            <rect x={x - 8} y="220" width="16" height="70" fill="#7c4a1e" />
+            <circle cx={x} cy="200" r={44 + (i % 2) * 10} fill={i % 2 ? '#3f9a3a' : '#4fae45'} />
+            <circle cx={x - 26} cy="216" r="30" fill="#5bbd50" />
+            <circle cx={x + 26} cy="216" r="30" fill="#3f9a3a" />
+          </g>
+        ))}
+        <rect x="0" y="286" width="800" height="8" fill="#a3e635" />
+      </svg>
+      <div aria-hidden className="park-ground absolute inset-x-0 bottom-0 h-[28%]" />
 
-      <div className="relative flex size-72 items-center justify-center sm:size-80">
-        {/* 줄: 원의 아랫쪽 호만 보이는 링을 회전시킨다. 각도 0 = 호가 발밑. 예고 구간이면 밝아진다 */}
-        <div
-          className={`absolute inset-0 rounded-full border-[8px] border-transparent transition-colors ${
-            cue ? 'border-b-rush-yellow drop-shadow-[0_0_14px_rgba(255,214,10,0.9)]' : 'border-b-amber-200 drop-shadow-[0_0_6px_rgba(0,0,0,0.6)]'
-          }`}
-          style={{ transform: `rotate(${angle}deg)` }}
-        />
+      <div className="relative mt-[6%] flex size-72 items-center justify-center sm:size-80">
+        {/* 줄: 아래쪽 호 + 나무 손잡이. 각도 0 = 호가 발밑. 예고 구간이면 밝아진다 */}
+        <svg viewBox="0 0 200 200" className="absolute inset-0 h-full w-full overflow-visible" style={{ transform: `rotate(${angle}deg)` }} aria-hidden>
+          <defs>
+            <linearGradient id="jr-rope" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#c4884f" /><stop offset="0.5" stopColor="#f0c890" /><stop offset="1" stopColor="#c4884f" /></linearGradient>
+          </defs>
+          <path d="M34.9 154.6 A85 85 0 0 0 165.1 154.6" fill="none" stroke={cue ? '#ffd60a' : 'url(#jr-rope)'} strokeWidth="7" strokeLinecap="round" className={cue ? 'drop-shadow-[0_0_10px_rgba(255,214,10,0.9)]' : 'drop-shadow-[0_3px_3px_rgba(0,0,0,0.4)]'} />
+          <rect x="28" y="140" width="12" height="30" rx="5" fill="#7c4a1e" transform="rotate(50 34.9 154.6)" />
+          <rect x="160" y="140" width="12" height="30" rx="5" fill="#7c4a1e" transform="rotate(-50 165.1 154.6)" />
+        </svg>
         {/* 발밑 링: 줄이 가까워지면 켜진다 — "지금 뛰어!" */}
-        <div
-          className={`pointer-events-none absolute bottom-2 h-6 w-36 rounded-[50%] border-4 transition-opacity ${
-            cue ? 'animate-[fx-cue_0.25s_ease-in-out_infinite_alternate] border-rush-yellow opacity-100' : 'border-white/20 opacity-40'
-          }`}
-        />
-        {/* 손잡이 */}
-        <div className="absolute inset-0" style={{ transform: `rotate(${angle}deg)` }}>
-          <span className="absolute -bottom-1 left-[6%] h-6 w-3 rounded bg-rose-500" />
-          <span className="absolute -bottom-1 right-[6%] h-6 w-3 rounded bg-rose-500" />
-        </div>
-
+        <div className={`pointer-events-none absolute bottom-2 h-6 w-36 rounded-[50%] border-4 transition-opacity ${cue ? 'animate-[fx-cue_0.25s_ease-in-out_infinite_alternate] border-rush-yellow opacity-100' : 'border-white/30 opacity-40'}`} />
+        {/* 발밑 그림자 */}
+        <div className="absolute bottom-5 h-3 w-20 rounded-full bg-black/35 transition-transform" style={{ transform: airborne ? 'scale(0.6)' : 'scale(1)' }} />
         {/* 캐릭터 */}
         <div
-          className={`relative transition-transform duration-150 ease-out ${done === 'fail' ? 'rotate-90 translate-y-8' : ''}`}
-          style={{ transform: airborne && !done ? 'translateY(-64px) scaleY(1.08)' : undefined }}
+          className={`relative h-40 w-24 transition-transform duration-150 ease-out ${done === 'fail' ? 'translate-y-6 rotate-90' : ''}`}
+          style={{ transform: airborne && !done ? 'translateY(-70px)' : undefined }}
         >
-          <PersonStanding
-            className={`size-32 ${done === 'fail' ? 'text-rush-red' : done === 'success' ? 'text-rush-green' : 'text-rush-yellow'}`}
-            strokeWidth={2.5}
-          />
+          <Person className="h-full w-full" pose={done === 'fail' ? 'fall' : done === 'success' ? 'cheer' : airborne ? 'jump' : 'stand'} shirt={done === 'fail' ? '#ff4d67' : done === 'success' ? '#34e29a' : '#f59e0b'} />
         </div>
-        {/* 발밑 그림자 */}
-        <div
-          className="absolute bottom-6 h-3 w-20 rounded-full bg-black/40 transition-transform"
-          style={{ transform: airborne ? 'scale(0.6)' : 'scale(1)' }}
-        />
       </div>
 
       <Hint>{done === 'success' ? '넘었다!' : done === 'fail' ? '걸렸다…' : 'Space · 클릭 · 탭'}</Hint>

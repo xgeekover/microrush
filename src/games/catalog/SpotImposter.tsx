@@ -53,35 +53,46 @@ export function SpotImposter({ onSuccess, onFail, speedMultiplier }: MicrogamePr
       data-imposter={layout.imposter}
       data-count={layout.count}
       data-done={done ?? ''}
-      className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-violet-900 to-fuchsia-950"
+      className="disco-stage relative flex h-full w-full flex-col items-center justify-center overflow-hidden"
     >
       <Instruction>하나만 달라!</Instruction>
+      {/* 무대 바닥 · 조명 */}
+      <div aria-hidden className="disco-floor absolute inset-x-[-20%] bottom-0 h-[42%]" />
+      <svg viewBox="0 0 800 400" preserveAspectRatio="none" className="absolute inset-0 h-full w-full" aria-hidden>
+        <defs>
+          <linearGradient id="si-beam" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="rgba(255,255,255,0.28)" /><stop offset="1" stopColor="rgba(255,255,255,0)" /></linearGradient>
+        </defs>
+        {[140, 400, 660].map((x) => <polygon key={x} points={`${x - 16},0 ${x + 16},0 ${x + 160},400 ${x - 160},400`} fill="url(#si-beam)" />)}
+        {[140, 400, 660].map((x) => <rect key={x} x={x - 22} y="0" width="44" height="14" rx="4" fill="#111827" />)}
+      </svg>
 
-      <div className="flex flex-wrap items-center justify-center gap-3 px-6 sm:gap-6">
+      <div className="relative flex flex-wrap items-center justify-center gap-4 px-6 sm:gap-7">
         {layout.offsets.map((o, i) => {
           const isImposter = i === layout.imposter;
           const isPicked = picked === i;
+          const ring =
+            isPicked && done === 'success'
+              ? 'ring-4 ring-rush-green shadow-[0_0_30px_rgba(52,226,154,0.8)]'
+              : isPicked && done === 'fail'
+                ? 'ring-4 ring-rush-red grayscale'
+                : done === 'fail' && isImposter
+                  ? 'ring-4 ring-rush-yellow'
+                  : 'ring-2 ring-white/20 hover:ring-white/60';
           return (
-            <button
-              key={i}
-              type="button"
-              data-index={i}
-              data-imposter={isImposter}
-              aria-label={isImposter ? '다른 녀석' : '같은 녀석'}
-              onPointerDown={() => pick(i)}
-              className={`flex size-24 items-center justify-center rounded-3xl border-4 text-6xl leading-none transition sm:size-28 sm:text-7xl ${
-                isPicked && done === 'success'
-                  ? 'animate-pop border-rush-green bg-rush-green/30'
-                  : isPicked && done === 'fail'
-                    ? 'border-rush-red bg-rush-red/40 grayscale'
-                    : done === 'fail' && isImposter
-                      ? 'border-rush-yellow bg-rush-yellow/20'
-                      : 'border-white/10 bg-white/5 hover:border-white/50'
-              } ${done ? '' : 'animate-[fx-dance_0.6s_ease-in-out_infinite_alternate]'}`}
-              style={{ transform: `translateY(${o.dy}px)`, animationDelay: `${o.delay / speedMultiplier}ms`, animationDuration: `${600 / speedMultiplier}ms` }}
-            >
-              <span>{isImposter ? layout.pair[1] : layout.pair[0]}</span>
-            </button>
+            <div key={i} className="relative">
+              <button
+                type="button"
+                data-index={i}
+                data-imposter={isImposter}
+                aria-label={isImposter ? '다른 녀석' : '같은 녀석'}
+                onPointerDown={() => pick(i)}
+                className={`relative flex size-24 items-center justify-center rounded-full bg-[radial-gradient(circle_at_30%_25%,#ffffff,#e2e8f0_45%,#94a3b8_100%)] text-6xl leading-none shadow-[0_14px_24px_-8px_rgba(0,0,0,0.7)] transition sm:size-28 sm:text-7xl ${ring} ${isPicked && done === 'success' ? 'animate-pop' : ''} ${done ? '' : 'animate-[fx-dance_0.6s_ease-in-out_infinite_alternate]'}`}
+                style={{ transform: `translateY(${o.dy}px)`, animationDelay: `${o.delay / speedMultiplier}ms`, animationDuration: `${600 / speedMultiplier}ms` }}
+              >
+                <span className="drop-shadow-[0_3px_0_rgba(0,0,0,0.25)]">{isImposter ? layout.pair[1] : layout.pair[0]}</span>
+              </button>
+              <span aria-hidden className="absolute inset-x-3 -bottom-4 h-3 rounded-[100%] bg-black/45 blur-[2px]" />
+            </div>
           );
         })}
       </div>

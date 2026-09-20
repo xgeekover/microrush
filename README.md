@@ -8,7 +8,7 @@
 
 ![로비](docs/lobby.jpg)
 
-<p align="center"><img src="docs/verb.jpg" width="46%" alt="지시어 배너 — 뽑아!" /> &nbsp; <img src="docs/play-phone.png" width="21%" alt="폰 세로 플레이 화면 — 골라내!" /> &nbsp; <img src="docs/game-over.jpg" width="30%" alt="게임 오버 카드" /></p>
+<p align="center"><img src="docs/verb.jpg" width="46%" alt="지시어 배너 — 뽑아!" /> &nbsp; <img src="docs/play-phone.png" width="21%" alt="폰 세로 플레이 화면 — 막아!" /> &nbsp; <img src="docs/game-over.jpg" width="30%" alt="게임 오버 카드" /></p>
 
 ## 실행
 
@@ -89,9 +89,9 @@ LOBBY ─시작─▶ READY(지시어 0.6s) ─▶ PLAYING(3~4s ÷ 템포) ─�
 
 ## 마이크로게임 17종
 
-<p align="center"><img src="docs/pluck.jpg" width="49%" alt="뽑아! — 흙에서 무가 드러나는 중" /> <img src="docs/crank.jpg" width="49%" alt="돌려! — 밸브를 다 돌려 물이 쏟아진다" /></p>
+![마이크로게임 17종](docs/games.jpg)
 
-장면은 전부 SVG · CSS 로 그린다(외부 이미지 없음). **뽑아!** 는 하늘 · 언덕 · 질감 있는 흙 · 풀 위에 SVG 무가 박혀 있고, 땅 아래는 `clip-path` 로 가려 두었다가 당기는 만큼 드러난다(구멍과 금도 같이 벌어진다). **돌려!** 는 배관실 벽 · 플랜지 · 밸브 보닛 · 압력계 · 팔꿈치 꼭지 · 배수 그레이팅 위에 CSS 핸드휠이 돌고, 압력계 바늘이 돌린 만큼 오르다가 두 바퀴를 채우면 꼭지에서 물이 쏟아진다.
+장면은 전부 SVG · CSS 로 그린다(외부 이미지 · 이모지 의존 최소화). 게임마다 **장소**(계기판 · 밤거리 · 공사장 · 밭 · 창가 · 주방 · 발사장 · 무대 · 공원 · 서커스 · 피크닉 · 경기장 · 과수원 · 탁자 · 배관실 · 금고실 · 체육관)가 있고, 물체는 재질 그라데이션과 그림자로 **접지**해 있으며, 상태에 따라 **변한다** — 당길수록 벌어지는 구멍, 돌릴수록 오르는 압력계 바늘, 파워에 비례해 커지는 로켓 화염, 떨어질수록 진해지는 착지 그림자, 성공하면 열리는 자물쇠 고리와 쏟아지는 물줄기. 사람 · 해 · 구름 · 풀 · 별 같은 공용 조각은 `src/games/scenery.tsx` 에 있다.
 
 | 지시어 | 파일 | 조작 | 판정 |
 |---|---|---|---|
@@ -147,6 +147,7 @@ LOBBY ─시작─▶ READY(지시어 0.6s) ─▶ PLAYING(3~4s ÷ 템포) ─�
 | `src/core/GameController.tsx` | 상태 머신 · 배경 · 하위 화면 조립 |
 | `src/components/Lobby.tsx` | 첫 화면 — 제목 · 세 단계 · 게임 카탈로그 · 항상 보이는 시작 바 |
 | `src/games/ui.tsx` | 마이크로게임 공용 지시문 · 힌트 알약 |
+| `src/games/scenery.tsx` | 장면 공용 조각 — 해 · 구름 · 별 · 풀 · 사람(자세 6종) |
 | `src/core/config.ts` | 템포 상수 · 배율 사다리 `SPEED_STEPS` · 제한 시간 / 째깍 간격 공식 |
 | `src/core/useGameLoop.ts` | 한 판의 rAF 시계 — 남은 비율 · 째깍 스케줄 · 시간 초과 |
 | `src/core/SoundManager.ts` | Web Audio 합성음 8종 + 이벤트 로그 |

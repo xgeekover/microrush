@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { capturePointer, useFrameLoop, useOutcome } from '../hooks';
 import type { MicrogameProps } from '../types';
+import { Person } from '../scenery';
 import { Hint, Instruction } from '../ui';
 
 /*
@@ -65,6 +66,8 @@ export function ChargeThrow({ onSuccess, onFail, speedMultiplier }: MicrogamePro
 
   const shown = thrown ?? power;
   const inZone = shown >= ZONE[0] && shown <= ZONE[1];
+  const landX = 12 + 0.8 * (thrown ?? 0); // 착지 x (%)
+  const START_X = 12;
 
   return (
     <div
@@ -78,32 +81,59 @@ export function ChargeThrow({ onSuccess, onFail, speedMultiplier }: MicrogamePro
       }}
       onPointerUp={release}
       onPointerCancel={release}
-      className="relative h-full w-full cursor-pointer touch-none select-none overflow-hidden bg-gradient-to-b from-indigo-300 to-indigo-600"
+      className="gym-wall relative h-full w-full cursor-pointer touch-none select-none overflow-hidden"
     >
       <Instruction>누르고 있다가 바구니에 놓아!</Instruction>
+      {/* 체육관: 벽 라인 · 마루 · 코트 선 */}
+      <div aria-hidden className="absolute inset-x-0 top-[40%] h-[3%] bg-[#b91c1c]/70" />
+      <div aria-hidden className="absolute inset-x-0 top-[44%] h-[1.5%] bg-[#1d4ed8]/60" />
+      <div aria-hidden className="gym-floor absolute inset-x-0 bottom-0 h-[26%]" />
+      <div aria-hidden className="absolute inset-x-0 bottom-[26%] h-1.5 bg-black/30" />
+      <div aria-hidden className="absolute bottom-[10%] h-1 w-[40%] bg-white/60" style={{ left: `${12 + 0.8 * ZONE[0] - 20}%` }} />
 
-      {/* 바닥 · 바구니 (파워 65~85% 위치) */}
-      <div className="absolute inset-x-0 bottom-0 h-[22%] bg-indigo-900" />
-      <div className="absolute bottom-[22%] h-16 -translate-x-1/2 rounded-b-3xl border-4 border-amber-900 bg-amber-600" style={{ left: `${8 + 0.84 * 75}%`, width: `${0.84 * 20}%` }} />
-      <div className="absolute bottom-[22%] h-2 rounded bg-rush-yellow/70" style={{ left: `${8 + 0.84 * ZONE[0]}%`, width: `${0.84 * (ZONE[1] - ZONE[0])}%` }} />
+      {/* 바구니 (파워 65~85% 자리) + 착지 표시 */}
+      <div className="absolute bottom-[22%] -translate-x-1/2" style={{ left: `${12 + 0.8 * 75}%`, width: `${0.8 * (ZONE[1] - ZONE[0]) + 6}%` }}>
+        <svg viewBox="0 0 120 80" className="w-full drop-shadow-[0_12px_12px_rgba(0,0,0,0.4)]" aria-hidden>
+          <defs><linearGradient id="ct-wicker" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#d9a15c" /><stop offset="1" stopColor="#8a5a2b" /></linearGradient></defs>
+          <path d="M6 22 L114 22 L100 78 L20 78 Z" fill="url(#ct-wicker)" stroke="#5b3a1e" strokeWidth="2" />
+          {[34, 46, 58, 70].map((y) => <path key={y} d={`M${8 + (y - 22) * 0.25} ${y} H${112 - (y - 22) * 0.25}`} stroke="#5b3a1e" strokeWidth="1.5" opacity="0.6" />)}
+          <ellipse cx="60" cy="22" rx="54" ry="9" fill="#3b2410" /><ellipse cx="60" cy="20" rx="54" ry="9" fill="none" stroke="#d9a15c" strokeWidth="4" />
+        </svg>
+      </div>
+      <div aria-hidden className="absolute bottom-[8%] h-2.5 -translate-x-1/2 rounded-[100%] bg-rush-yellow/60" style={{ left: `${12 + 0.8 * 75}%`, width: `${0.8 * (ZONE[1] - ZONE[0])}%` }} />
 
       {/* 던지는 사람 + 공 */}
-      <div className="absolute bottom-[22%] left-[6%] text-7xl">🧍</div>
+      <div className="absolute bottom-[20%] h-[30%] w-[14%]" style={{ left: `${START_X - 6}%` }}>
+        <Person className="h-full w-full drop-shadow-[0_10px_10px_rgba(0,0,0,0.4)]" pose={holding || thrown !== null ? 'throw' : 'stand'} shirt="#2563eb" />
+      </div>
       <div
-        className="absolute text-5xl transition-[left,bottom] duration-500 ease-out"
-        style={{ left: `${8 + 0.84 * (thrown ?? 0)}%`, bottom: thrown !== null ? '24%' : '46%' }}
+        key={thrown === null ? 'hold' : 'fly'}
+        className="absolute bottom-[42%] w-[6%] -translate-x-1/2"
+        style={
+          {
+            left: `${START_X + 4}%`,
+            '--fx-dx': `${landX - START_X - 4}vw`,
+            '--fx-dy': `${thrown !== null ? 'calc(20vh)' : '0px'}`,
+            animation: thrown !== null ? 'fx-arc 0.6s cubic-bezier(0.3,0,0.7,1) forwards' : undefined,
+            transform: holding ? `scale(${1 + power / 400})` : undefined,
+          } as React.CSSProperties
+        }
       >
-        🏀
+        <svg viewBox="0 0 100 100" className="w-full drop-shadow-[0_8px_8px_rgba(0,0,0,0.4)]" aria-hidden>
+          <defs><radialGradient id="ct-ball" cx="0.35" cy="0.3" r="0.8"><stop offset="0" stopColor="#ffb066" /><stop offset="1" stopColor="#c2410c" /></radialGradient></defs>
+          <circle cx="50" cy="50" r="46" fill="url(#ct-ball)" stroke="#7c2d12" strokeWidth="2" />
+          <path d="M4 50 H96 M50 4 V96 M18 18 Q50 50 82 82 M82 18 Q50 50 18 82" fill="none" stroke="#7c2d12" strokeWidth="3" />
+        </svg>
       </div>
 
       {/* 파워 게이지 */}
-      <div className="absolute inset-x-[8%] bottom-[8%]">
-        <div className="relative h-7 overflow-hidden rounded-full border-4 border-black/40 bg-black/30">
-          <div className="absolute inset-y-0 bg-rush-yellow/30" style={{ left: `${ZONE[0]}%`, width: `${ZONE[1] - ZONE[0]}%` }} />
+      <div className="absolute inset-x-[8%] bottom-[3%]">
+        <div className="relative h-6 overflow-hidden rounded-full border border-white/40 bg-black/45 shadow-[inset_0_2px_6px_rgba(0,0,0,0.5)]">
+          <div className="absolute inset-y-0 bg-rush-yellow/35" style={{ left: `${ZONE[0]}%`, width: `${ZONE[1] - ZONE[0]}%` }} />
           <div className={`h-full transition-none ${inZone ? 'bg-rush-green' : 'bg-gradient-to-r from-sky-400 to-rush-pink'}`} style={{ width: `${shown}%` }} />
         </div>
-        <Hint>{done === 'success' ? '골인!' : done === 'fail' ? (shown < ZONE[0] ? '짧았어…' : '넘어갔어…') : holding ? '놓아!' : 'Space · 화면을 누르고 있어'}</Hint>
       </div>
+      <Hint>{done === 'success' ? '골인!' : done === 'fail' ? (shown < ZONE[0] ? '짧았어…' : '넘어갔어…') : holding ? '놓아!' : 'Space · 화면을 누르고 있어'}</Hint>
     </div>
   );
 }

@@ -83,15 +83,20 @@ export function ShellGame({ onSuccess, onFail, speedMultiplier }: MicrogameProps
       data-stage={stage}
       data-ball-slot={stage === 'pick' || done ? ballSlot : ''}
       data-done={done ?? ''}
-      className="relative h-full w-full select-none overflow-hidden bg-gradient-to-b from-amber-100 to-amber-300"
+      className="room-wall relative h-full w-full select-none overflow-hidden"
     >
       <Instruction>{stage === 'show' ? '공을 잘 봐…' : stage === 'shuffle' ? '섞는다!' : '어느 컵?'}</Instruction>
 
       {/* 탁자 */}
-      <div className="absolute inset-x-0 bottom-0 h-[30%] bg-amber-700" />
+      <div aria-hidden className="table-wood absolute inset-x-0 bottom-0 h-[34%] shadow-[0_-10px_20px_rgba(0,0,0,0.25)]" />
+      <div aria-hidden className="absolute inset-x-0 bottom-[34%] h-3 bg-[linear-gradient(180deg,#c98b52,#a86b3a)]" />
+      {/* 자리 표시 (분필) */}
+      {SLOT_X.map((x, i) => (
+        <span key={x} aria-hidden className="absolute bottom-[27%] -translate-x-1/2 font-display text-lg text-white/50" style={{ left: `${x}%` }}>{i + 1}</span>
+      ))}
 
       {/* 공 — 공이 든 컵의 자리를 따라간다 */}
-      <div className="absolute bottom-[32%] size-10 -translate-x-1/2 rounded-full bg-rush-red shadow-[0_0_14px_rgba(255,71,87,0.7)] transition-[left] duration-300" style={{ left: `${SLOT_X[ballSlot]}%` }} />
+      <div className="absolute bottom-[33%] size-10 -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_35%_30%,#ffb3b3,#e11d2f_45%,#7f0d18)] shadow-[0_6px_10px_rgba(0,0,0,0.4)] transition-[left] duration-300" style={{ left: `${SLOT_X[ballSlot]}%` }} />
 
       {/* 컵 3개 */}
       {[0, 1, 2].map((cup) => (
@@ -102,12 +107,23 @@ export function ShellGame({ onSuccess, onFail, speedMultiplier }: MicrogameProps
           data-slot={slots[cup]}
           aria-label={`${slots[cup] + 1}번 컵`}
           onPointerDown={() => pickSlot(slots[cup])}
-          className={`absolute bottom-[30%] h-32 w-24 -translate-x-1/2 rounded-t-[40%] rounded-b-md border-4 border-black/30 transition-[left,transform] duration-300 sm:w-28 ${
-            picked === cup ? (done === 'success' ? 'bg-rush-green' : 'bg-rush-red') : 'bg-gradient-to-b from-red-500 to-red-700'
-          }`}
-          style={{ left: `${SLOT_X[slots[cup]]}%`, transform: `translateX(-50%) translateY(${lifted ? -70 : 0}px)`, zIndex: 2 }}
+          className="absolute bottom-[32%] h-36 w-28 -translate-x-1/2 transition-[left,transform] duration-300 sm:w-32"
+          style={{ left: `${SLOT_X[slots[cup]]}%`, transform: `translateX(-50%) translateY(${lifted ? -78 : 0}px)`, zIndex: 2 }}
         >
-          <span className="absolute inset-x-0 -bottom-9 text-center text-sm font-black text-amber-950/60">{slots[cup] + 1}</span>
+          <svg viewBox="0 0 100 130" className="h-full w-full overflow-visible drop-shadow-[0_14px_14px_rgba(0,0,0,0.4)]" aria-hidden>
+            <defs>
+              <linearGradient id={`sh-cup-${cup}`} x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stopColor={picked === cup ? (done === 'success' ? '#14532d' : '#7f1d1d') : '#7f1d1d'} />
+                <stop offset="0.35" stopColor={picked === cup ? (done === 'success' ? '#34e29a' : '#ff4d67') : '#ef4444'} />
+                <stop offset="0.6" stopColor={picked === cup ? (done === 'success' ? '#6ee7b7' : '#ff8a8a') : '#f87171'} />
+                <stop offset="1" stopColor={picked === cup ? (done === 'success' ? '#14532d' : '#7f1d1d') : '#7f1d1d'} />
+              </linearGradient>
+            </defs>
+            <path d="M8 124 L20 34 Q50 -8 80 34 L92 124 Z" fill={`url(#sh-cup-${cup})`} stroke="#3f0a0a" strokeWidth="2" />
+            <ellipse cx="50" cy="124" rx="42" ry="7" fill="#3f0a0a" opacity="0.5" />
+            <path d="M22 34 Q50 6 78 34" fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="5" strokeLinecap="round" />
+            <path d="M26 44 L16 112" stroke="rgba(255,255,255,0.35)" strokeWidth="6" strokeLinecap="round" />
+          </svg>
         </button>
       ))}
 
