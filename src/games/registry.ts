@@ -1,12 +1,20 @@
+import { ArrowCode } from './catalog/ArrowCode';
+import { BalancePole } from './catalog/BalancePole';
+import { ChargeThrow } from './catalog/ChargeThrow';
 import { CleanScreen } from './catalog/CleanScreen';
+import { CountThem } from './catalog/CountThem';
 import { DodgeFall } from './catalog/DodgeFall';
+import { GoalKeeper } from './catalog/GoalKeeper';
 import { JumpRope } from './catalog/JumpRope';
 import { PluckRoot } from './catalog/PluckRoot';
 import { PourDrink } from './catalog/PourDrink';
 import { RedLightGreen } from './catalog/RedLightGreen';
 import { RocketMash } from './catalog/RocketMash';
+import { ShellGame } from './catalog/ShellGame';
 import { SpotImposter } from './catalog/SpotImposter';
 import { StopTheGauge } from './catalog/StopTheGauge';
+import { SwatFly } from './catalog/SwatFly';
+import { TurnCrank } from './catalog/TurnCrank';
 import type { MicrogameDefinition } from './types';
 
 /**
@@ -78,10 +86,75 @@ export const MICROGAMES: readonly MicrogameDefinition[] = [
     duration: 3.0,
     component: JumpRope,
   },
+  {
+    id: 'balance-pole',
+    verb: '세워!',
+    description: '쓰러지려는 막대를 반대쪽을 눌러 버틴다',
+    duration: 3.0,
+    succeedOnTimeout: true,
+    component: BalancePole,
+  },
+  {
+    id: 'swat-fly',
+    verb: '잡아!',
+    description: '칸을 옮겨 다니는 파리를 때린다',
+    duration: 3.2,
+    component: SwatFly,
+  },
+  {
+    id: 'goal-keeper',
+    verb: '막아!',
+    description: '공이 날아오는 구역으로 골키퍼를 옮긴다',
+    duration: 3.0,
+    component: GoalKeeper,
+  },
+  {
+    id: 'count-them',
+    verb: '세어!',
+    description: '튀는 사과가 몇 개인지 고른다',
+    duration: 3.5,
+    component: CountThem,
+  },
+  {
+    id: 'shell-game',
+    verb: '찾아!',
+    description: '섞인 컵 중 공이 든 컵을 고른다',
+    duration: 3.5,
+    component: ShellGame,
+  },
+  {
+    id: 'turn-crank',
+    verb: '돌려!',
+    description: '밸브를 두 바퀴 돌린다 — 원을 그리며 드래그',
+    duration: 3.5,
+    component: TurnCrank,
+  },
+  {
+    id: 'arrow-code',
+    verb: '열어!',
+    description: '자물쇠의 화살표를 순서대로 입력한다',
+    duration: 3.5,
+    component: ArrowCode,
+  },
+  {
+    id: 'charge-throw',
+    verb: '던져!',
+    description: '누르고 있다가 파워가 바구니에 맞을 때 놓는다',
+    duration: 3.2,
+    component: ChargeThrow,
+  },
 ];
 
-/** 직전 게임과 같은 것은 피해서 하나 뽑는다 (게임이 하나뿐이면 그냥 그것). */
-export function pickNextGame(previousId: string | null): MicrogameDefinition {
-  const pool = MICROGAMES.length > 1 ? MICROGAMES.filter((g) => g.id !== previousId) : MICROGAMES;
-  return pool[Math.floor(Math.random() * pool.length)];
+/** 이만큼 최근에 나온 게임은 다시 뽑지 않는다 (풀이 작으면 가능한 만큼만) */
+export const RECENT_EXCLUDE = 3;
+
+/**
+ * 최근에 나온 게임들을 피해서 하나 뽑는다. 직전 하나만 피하면 17종에서도 같은 게임이
+ * 두세 판 걸러 자주 돌아오므로, 최근 3개를 빼고 균등 추첨한다.
+ */
+export function pickNextGame(recentIds: readonly string[]): MicrogameDefinition {
+  const avoid = new Set(recentIds.slice(-RECENT_EXCLUDE));
+  const pool = MICROGAMES.filter((g) => !avoid.has(g.id));
+  const from = pool.length > 0 ? pool : MICROGAMES;
+  return from[Math.floor(Math.random() * from.length)];
 }

@@ -69,3 +69,15 @@ export function useFrameLoop(callback: (dt: number, elapsed: number) => void, ac
     return () => cancelAnimationFrame(raf);
   }, [active]);
 }
+
+/**
+ * 포인터 캡처를 시도한다. 합성 이벤트(테스트 봇)나 이미 끝난 포인터에는 setPointerCapture 가 예외를 던지는데,
+ * 캡처는 "요소 밖으로 나가도 계속 추적" 하기 위한 보조일 뿐이라 실패해도 게임은 이어져야 한다.
+ */
+export function capturePointer(e: React.PointerEvent): void {
+  try {
+    e.currentTarget.setPointerCapture(e.pointerId);
+  } catch {
+    // 무시
+  }
+}

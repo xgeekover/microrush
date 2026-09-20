@@ -36,6 +36,8 @@ interface RushState {
   /** 템포가 오른 횟수 */
   speedLevel: number;
   game: MicrogameDefinition | null;
+  /** 최근에 나온 게임 id (추첨에서 제외) */
+  recent: string[];
   outcome: Outcome | null;
   /** 이번 판정이 도화선이 다 타서 났는가 (펑 연출용) */
   timedOut: boolean;
@@ -59,6 +61,7 @@ function initialState(): RushState {
     stage: 0,
     speedLevel: 0,
     game: null,
+    recent: [],
     outcome: null,
     timedOut: false,
     frozenRatio: 1,
@@ -69,7 +72,7 @@ function initialState(): RushState {
 function reducer(s: RushState, a: Action): RushState {
   switch (a.type) {
     case 'START':
-      return { ...initialState(), best: s.best, phase: 'READY', game: a.game, stage: 1 };
+      return { ...initialState(), best: s.best, phase: 'READY', game: a.game, recent: [a.game.id], stage: 1 };
     case 'PLAY':
       return s.phase === 'READY' ? { ...s, phase: 'PLAYING' } : s;
     case 'RESOLVE': {
@@ -89,8 +92,9 @@ function reducer(s: RushState, a: Action): RushState {
       if (s.phase !== 'RESULT') return s;
       if (s.hearts <= 0) return { ...s, phase: 'GAMEOVER', best: Math.max(s.best, s.score) };
       const speedUp = s.outcome === 'success' && s.score % RUSH.stagesPerSpeedUp === 0;
-      if (speedUp) return { ...s, phase: 'SPEED_UP', speedLevel: s.speedLevel + 1, game: a.nextGame, outcome: null };
-      return { ...s, phase: 'READY', game: a.nextGame, stage: s.stage + 1, outcome: null };
+      const recent = [...s.recent, a.nextGame.id].slice(-8);
+      if (speedUp) return { ...s, phase: 'SPEED_UP', speedLevel: s.speedLevel + 1, game: a.nextGame, recent, outcome: null };
+      return { ...s, phase: 'READY', game: a.nextGame, recent, stage: s.stage + 1, outcome: null };
     }
     case 'SPEED_UP_DONE':
       return s.phase === 'SPEED_UP' ? { ...s, phase: 'READY', stage: s.stage + 1 } : s;
@@ -103,7 +107,7 @@ export function GameController() {
   const [muted, setMuted] = useState(() => loadSettings().muted);
   const [sound] = useState(() => new SoundManager());
 
-  const { phase, game, outcome, stage, score, hearts, speedLevel, timedOut, frozenRatio, best } = state;
+  const { phase, game, recent, outcome, stage, score, hearts, speedLevel, timedOut, frozenRatio, best } = state;
   const speed = speedMultiplierFor(speedLevel);
 
   // 한 판의 시계. 도화선 비율을 매 프레임 주고, 째깍 시점과 시간 초과를 알린다.
@@ -125,7 +129,7 @@ export function GameController() {
 
   const start = useCallback(() => {
     sound.unlock();
-    dispatch({ type: 'START', game: pickNextGame(null) });
+    dispatch({ type: 'START', game: pickNextGame([]) });
   }, [sound]);
 
   // 마이크로게임에 넘기는 판정 콜백. 참조가 바뀌지 않으므로 게임이 effect 의존성에 넣어도 안전하다.
@@ -203,11 +207,11 @@ export function GameController() {
     if (outcome === 'success') sound.success(delay);
     else sound.fail(delay);
     const t = window.setTimeout(
-      () => dispatch({ type: 'RESULT_DONE', nextGame: pickNextGame(game?.id ?? null) }),
+      () => dispatch({ type: 'RESULT_DONE', nextGame: pickNextGame(recent) }),
       RUSH.resultMs,
     );
     return () => window.clearTimeout(t);
-  }, [phase, outcome, timedOut, game, sound]);
+  }, [phase, outcome, timedOut, game, recent, sound]);
 
   // SPEED_UP: 연출 1.2초
   useEffect(() => {
@@ -320,7 +324,7 @@ function Lobby({ best, onStart }: { best: number; onStart: () => void }) {
 
       <p className="text-xs text-white/50">
         <Gamepad2 aria-hidden className="mr-1 inline size-4" />
-        조작: Space · 클릭 · 탭 = 누르기 / ← → · A D · 마우스 · 드래그 = 이동 / M = 음소거
+        조작: Space · 클릭 · 탭 = 누르기 / ← → · A D · 드래그 = 이동·회전 / 1~9 = 고르기 / M = 음소거
         {best > 0 && <span className="ml-3 font-black text-rush-yellow">BEST {best}</span>}
       </p>
     </div>

@@ -31,6 +31,21 @@
   to { transform: translateY(-12px) rotate(6deg); }
 }
 
+/* 잡아! · 막아!: 파리와 공이 잘게 떨린다 */
+@keyframes fx-jitter {
+  0% { transform: translate(0, 0) rotate(0); }
+  25% { transform: translate(2px, -1px) rotate(4deg); }
+  50% { transform: translate(-2px, 1px) rotate(-3deg); }
+  75% { transform: translate(1px, 2px) rotate(2deg); }
+  100% { transform: translate(0, 0) rotate(0); }
+}
+
+/* 세어!: 사과가 통통 튄다 */
+@keyframes fx-bob {
+  from { transform: translate(-50%, -50%) scale(1); }
+  to { transform: translate(-50%, -62%) scale(1.06); }
+}
+
 /* 점프!: 줄이 발밑에 가까워질 때 발밑 링이 맥동한다 */
 @keyframes fx-cue {
   from { transform: scale(0.92); opacity: 0.7; }

@@ -1,6 +1,6 @@
 import { Leaf } from 'lucide-react';
 import { useRef, useState } from 'react';
-import { useOutcome } from '../hooks';
+import { capturePointer, useOutcome } from '../hooks';
 import type { MicrogameProps } from '../types';
 
 /*
@@ -23,7 +23,7 @@ export function PluckRoot({ onSuccess, onFail, speedMultiplier }: MicrogameProps
 
   const onDown = (e: React.PointerEvent) => {
     if (isDone() || drag.current) return;
-    e.currentTarget.setPointerCapture(e.pointerId);
+    capturePointer(e);
     drag.current = { id: e.pointerId, startY: e.clientY, startAt: performance.now() };
   };
 
