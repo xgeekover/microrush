@@ -2,6 +2,7 @@ import { Leaf } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { capturePointer, useOutcome } from '../hooks';
 import type { MicrogameProps } from '../types';
+import { Hint, Instruction } from '../ui';
 
 /*
  * 뽑아! — 땅에 박힌 거대한 무를 잡고 위로 홱 당긴다.
@@ -65,9 +66,7 @@ export function PluckRoot({ onSuccess, onFail, speedMultiplier }: MicrogameProps
       data-done={done ?? ''}
       className="relative h-full w-full select-none overflow-hidden bg-gradient-to-b from-sky-400 to-sky-200"
     >
-      <p className="absolute inset-x-0 top-6 text-center text-2xl font-black tracking-widest text-white drop-shadow">
-        잡고 위로 홱!
-      </p>
+      <Instruction>잡고 위로 홱!</Instruction>
 
       {/* 땅 */}
       <div className="absolute inset-x-0 bottom-0 h-[38%] bg-gradient-to-b from-amber-800 to-amber-950" />
@@ -116,7 +115,7 @@ export function PluckRoot({ onSuccess, onFail, speedMultiplier }: MicrogameProps
         </>
       )}
 
-      <p className="absolute inset-x-0 bottom-[10%] text-center text-sm text-amber-100/80">무를 누른 채 위로 드래그</p>
+      <Hint>무를 누른 채 위로 드래그</Hint>
     </div>
   );
 }

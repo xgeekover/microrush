@@ -2,6 +2,7 @@ import { PersonStanding } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useFrameLoop, useOutcome, usePressKey } from '../hooks';
 import type { MicrogameProps } from '../types';
+import { Hint, Instruction } from '../ui';
 
 /*
  * 점프! — 줄이 발밑을 지나는 순간 공중에 있어야 한다.
@@ -61,9 +62,7 @@ export function JumpRope({ onSuccess, onFail, speedMultiplier }: MicrogameProps)
       onPointerDown={jump}
       className="relative flex h-full w-full cursor-pointer flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-teal-800 to-teal-950"
     >
-      <p className="absolute inset-x-0 top-6 text-center text-2xl font-black tracking-widest text-white/70">
-        줄이 발밑에 올 때 점프!
-      </p>
+      <Instruction>줄이 발밑에 올 때 점프!</Instruction>
 
       <div className="relative flex size-72 items-center justify-center sm:size-80">
         {/* 줄: 원의 아랫쪽 호만 보이는 링을 회전시킨다. 각도 0 = 호가 발밑. 예고 구간이면 밝아진다 */}
@@ -102,9 +101,7 @@ export function JumpRope({ onSuccess, onFail, speedMultiplier }: MicrogameProps)
         />
       </div>
 
-      <p className="absolute inset-x-0 bottom-6 text-center text-sm text-white/50">
-        {done === 'success' ? '넘었다!' : done === 'fail' ? '걸렸다…' : 'Space · 클릭 · 탭'}
-      </p>
+      <Hint>{done === 'success' ? '넘었다!' : done === 'fail' ? '걸렸다…' : 'Space · 클릭 · 탭'}</Hint>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { Check, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import type { MicrogameProps, Outcome } from '../types';
+import { Hint, Instruction } from '../ui';
 
 /**
  * 멈춰! — 좌우로 오가는 바늘이 초록 영역 안에 있을 때 누른다.
@@ -71,7 +72,7 @@ export function StopTheGauge({ onSuccess, onFail, timeRemainingRatio, speedMulti
       onPointerDown={press}
       className="flex h-full w-full cursor-pointer flex-col items-center justify-center gap-8 bg-gradient-to-b from-rush-panel to-rush-bg px-8"
     >
-      <p className="text-2xl font-black tracking-widest text-white/70">초록에서 멈춰!</p>
+      <Instruction>초록에서 멈춰!</Instruction>
 
       <div className="relative w-full max-w-2xl">
         {/* 트랙 */}
@@ -101,7 +102,7 @@ export function StopTheGauge({ onSuccess, onFail, timeRemainingRatio, speedMulti
         )}
       </div>
 
-      <p className="text-sm text-white/50">Space · 클릭 · 탭</p>
+      <Hint>Space · 클릭 · 탭</Hint>
       {/* 시간이 촉박하면 배경이 붉어진다 */}
       <div
         className="pointer-events-none absolute inset-0 bg-rush-red transition-opacity"

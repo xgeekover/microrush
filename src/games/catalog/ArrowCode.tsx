@@ -2,6 +2,7 @@ import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Lock, LockOpen } from 'lucid
 import { useEffect, useRef, useState } from 'react';
 import { useOutcome } from '../hooks';
 import type { MicrogameProps } from '../types';
+import { Hint, Instruction } from '../ui';
 
 /*
  * 열어! — 자물쇠에 적힌 화살표 순서대로 입력하면 열린다. 하나라도 틀리면 즉시 실패.
@@ -66,9 +67,7 @@ export function ArrowCode({ onSuccess, onFail, speedMultiplier }: MicrogameProps
       onPointerUp={onUp}
       className="relative flex h-full w-full touch-none select-none flex-col items-center justify-center gap-6 overflow-hidden bg-gradient-to-b from-zinc-800 to-zinc-950"
     >
-      <p className="absolute inset-x-0 top-6 text-center text-2xl font-black tracking-widest text-white/70">
-        순서대로 입력해!
-      </p>
+      <Instruction>순서대로 입력해!</Instruction>
 
       <div className="flex items-center gap-4">
         {done === 'success' ? <LockOpen className="size-16 text-rush-green" strokeWidth={2.5} /> : <Lock className={`size-16 ${done === 'fail' ? 'text-rush-red' : 'text-rush-yellow'}`} strokeWidth={2.5} />}
@@ -120,7 +119,7 @@ export function ArrowCode({ onSuccess, onFail, speedMultiplier }: MicrogameProps
         )}
       </div>
 
-      <p className="absolute inset-x-0 bottom-4 text-center text-sm text-white/50">방향키 · 버튼 · 스와이프</p>
+      <Hint>방향키 · 버튼 · 스와이프</Hint>
     </div>
   );
 }

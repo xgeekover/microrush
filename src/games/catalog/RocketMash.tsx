@@ -2,6 +2,7 @@ import { Flame, Rocket } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useOutcome, usePressKey } from '../hooks';
 import type { MicrogameProps } from '../types';
+import { Hint, Instruction } from '../ui';
 
 /*
  * 연타해! — Space 나 화면을 N 번 연타해 파워 게이지를 100% 채우면 로켓이 발사된다.
@@ -38,9 +39,7 @@ export function RocketMash({ onSuccess, onFail, speedMultiplier }: MicrogameProp
       onPointerDown={mash}
       className="relative h-full w-full cursor-pointer select-none overflow-hidden bg-gradient-to-b from-indigo-950 via-indigo-900 to-slate-800"
     >
-      <p className="absolute inset-x-0 top-6 text-center text-2xl font-black tracking-widest text-white/70">
-        연타! 연타!
-      </p>
+      <Instruction>연타! 연타!</Instruction>
 
       {/* 별 */}
       {[12, 30, 55, 72, 88].map((x, i) => (
@@ -77,7 +76,7 @@ export function RocketMash({ onSuccess, onFail, speedMultiplier }: MicrogameProp
             style={{ width: `${power}%` }}
           />
         </div>
-        <p className="mt-2 text-center text-sm text-white/50">Space · 클릭 · 탭을 연타</p>
+        <Hint>Space · 클릭 · 탭을 연타</Hint>
       </div>
 
       {launched && (

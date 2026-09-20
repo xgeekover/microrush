@@ -60,9 +60,13 @@
    * 불꽃·스파크는 보이고, 좌우·아래로 튀는 파편은 잘려서 페이지 스크롤을 만들지 않는다.
    * 헤드룸이 main 하단과 겹치므로 포인터 이벤트는 전부 통과시킨다.
    */
-  height: calc(var(--bomb-bar) + var(--bomb-headroom));
+  --bomb-safe: env(safe-area-inset-bottom, 0px);
+  height: calc(var(--bomb-bar) + var(--bomb-headroom) + var(--bomb-safe));
   margin-top: calc(-1 * var(--bomb-headroom));
   padding-top: var(--bomb-headroom);
+  /* 홈 인디케이터 뒤로도 그을린 바닥이 이어진다 (도화선·불꽃은 그 위에) */
+  padding-bottom: var(--bomb-safe);
+  background-color: #0b0710;
   overflow: hidden;
   pointer-events: none;
   transition:
@@ -86,7 +90,7 @@
 /* ── 탄 자리 ───────────────────────────────────────────────────────────── */
 .bomb-bar {
   position: absolute;
-  inset: auto 0 0 0;
+  inset: auto 0 var(--bomb-safe) 0;
   height: var(--bomb-bar);
   box-sizing: border-box;
   border-top: 4px solid rgba(0, 0, 0, 0.6);
@@ -109,7 +113,7 @@
 .bomb-fuse {
   position: absolute;
   left: 0;
-  bottom: 5px;
+  bottom: calc(5px + var(--bomb-safe));
   height: 14px;
   border-radius: 0 7px 7px 0;
   background-color: var(--bomb-rope-b);
@@ -139,7 +143,7 @@
 .bomb-head {
   position: absolute;
   left: 0;
-  bottom: 0;
+  bottom: var(--bomb-safe);
   width: 0;
   height: var(--bomb-bar);
 }

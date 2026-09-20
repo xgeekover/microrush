@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useOutcome } from '../hooks';
 import type { MicrogameProps } from '../types';
+import { Hint, Instruction } from '../ui';
 
 /*
  * 골라내! — 춤추는 표정들 가운데 하나만 다르다. 그놈을 누르면 성공, 다른 놈을 누르면 즉시 실패.
@@ -54,9 +55,7 @@ export function SpotImposter({ onSuccess, onFail, speedMultiplier }: MicrogamePr
       data-done={done ?? ''}
       className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-violet-900 to-fuchsia-950"
     >
-      <p className="absolute inset-x-0 top-6 text-center text-2xl font-black tracking-widest text-white/70">
-        하나만 달라!
-      </p>
+      <Instruction>하나만 달라!</Instruction>
 
       <div className="flex flex-wrap items-center justify-center gap-3 px-6 sm:gap-6">
         {layout.offsets.map((o, i) => {
@@ -87,9 +86,7 @@ export function SpotImposter({ onSuccess, onFail, speedMultiplier }: MicrogamePr
         })}
       </div>
 
-      <p className="absolute inset-x-0 bottom-6 text-center text-sm text-white/50">
-        {done === 'success' ? '찾았다!' : done === 'fail' ? '그놈이 아니야…' : '다른 하나를 클릭 · 탭'}
-      </p>
+      <Hint>{done === 'success' ? '찾았다!' : done === 'fail' ? '그놈이 아니야…' : '다른 하나를 클릭 · 탭'}</Hint>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { capturePointer, useFrameLoop, useOutcome } from '../hooks';
 import type { MicrogameProps } from '../types';
+import { Hint, Instruction } from '../ui';
 
 /*
  * 세워! — 손바닥 위의 막대가 쓰러지려 한다. 기우는 반대쪽을 눌러 버틴다.
@@ -95,9 +96,7 @@ export function BalancePole({ onSuccess, onFail, speedMultiplier }: MicrogamePro
       onPointerCancel={release}
       className="relative h-full w-full cursor-pointer touch-none select-none overflow-hidden bg-gradient-to-b from-orange-200 to-orange-400"
     >
-      <p className="absolute inset-x-0 top-6 text-center text-2xl font-black tracking-widest text-orange-950/70">
-        기우는 반대쪽을 눌러!
-      </p>
+      <Instruction>기우는 반대쪽을 눌러!</Instruction>
 
       {/* 좌우 누름 표시 */}
       <div className={`absolute inset-y-0 left-0 w-1/2 transition-opacity ${pressing === -1 ? 'bg-white/20' : 'opacity-0'}`} />
@@ -113,9 +112,7 @@ export function BalancePole({ onSuccess, onFail, speedMultiplier }: MicrogamePro
       {/* 손 */}
       <div className="absolute bottom-[14%] left-1/2 -translate-x-1/2 text-7xl">🖐️</div>
 
-      <p className="absolute inset-x-0 bottom-4 text-center text-sm text-orange-950/60">
-        {done === 'success' ? '버텼다!' : done === 'fail' ? '쓰러졌다…' : '← → · 화면 좌/우 누르기'}
-      </p>
+      <Hint>{done === 'success' ? '버텼다!' : done === 'fail' ? '쓰러졌다…' : '← → · 화면 좌/우 누르기'}</Hint>
     </div>
   );
 }

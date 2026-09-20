@@ -1,6 +1,7 @@
 import { Smile, Weight } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import type { MicrogameProps, Outcome } from '../types';
+import { Hint, Instruction } from '../ui';
 
 /*
  * 피해! — 위에서 쇳덩이 하나가 플레이어를 조준해 떨어진다. 옆으로 비켜서면 성공.
@@ -110,9 +111,7 @@ export function DodgeFall({ onSuccess, onFail, speedMultiplier }: MicrogameProps
       onPointerDown={pointTo}
       className="relative h-full w-full cursor-none touch-none overflow-hidden bg-gradient-to-b from-sky-900 to-rush-bg"
     >
-      <p className="absolute inset-x-0 top-6 text-center text-2xl font-black tracking-widest text-white/70">
-        옆으로 피해!
-      </p>
+      <Instruction>옆으로 피해!</Instruction>
 
       {/* 바닥 */}
       <div className="absolute inset-x-0 bottom-0 h-[6%] bg-rush-panel border-t-4 border-black/40" />
@@ -142,9 +141,7 @@ export function DodgeFall({ onSuccess, onFail, speedMultiplier }: MicrogameProps
         <Smile className="size-3/4 text-rush-bg" strokeWidth={2.5} />
       </div>
 
-      <p className="absolute inset-x-0 bottom-[8%] text-center text-sm text-white/50">
-        마우스 · 드래그 · ← → · A D
-      </p>
+      <Hint>마우스 · 드래그 · ← → · A D</Hint>
     </div>
   );
 }

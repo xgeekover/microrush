@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useOutcome } from '../hooks';
 import type { MicrogameProps } from '../types';
+import { Hint, Instruction } from '../ui';
 
 /*
  * 잡아! — 3×3 칸을 옮겨 다니는 파리를 때린다. 파리가 있는 칸을 누르면 성공.
@@ -69,9 +70,7 @@ export function SwatFly({ onSuccess, onFail, speedMultiplier }: MicrogameProps) 
       data-done={done ?? ''}
       className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-lime-200 to-lime-400"
     >
-      <p className="absolute inset-x-0 top-6 text-center text-2xl font-black tracking-widest text-lime-950/70">
-        파리를 잡아!
-      </p>
+      <Instruction>파리를 잡아!</Instruction>
       <div className="grid grid-cols-3 gap-2 sm:gap-3">
         {Array.from({ length: 9 }, (_, i) => {
           const here = i === cell;
@@ -93,7 +92,7 @@ export function SwatFly({ onSuccess, onFail, speedMultiplier }: MicrogameProps) 
           );
         })}
       </div>
-      <p className="absolute inset-x-0 bottom-4 text-center text-sm text-lime-950/60">칸 탭 · 클릭 · 숫자 1~9</p>
+      <Hint>칸 탭 · 클릭 · 숫자 1~9</Hint>
     </div>
   );
 }

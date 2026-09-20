@@ -1,3 +1,4 @@
+import { Apple, Bug, Carrot, Cog, CupSoda, Eye, Gauge, Goal, Hand, KeyRound, PersonStanding, Rocket, Scale, ScanFace, SprayCan, Target, Weight } from 'lucide-react';
 import { ArrowCode } from './catalog/ArrowCode';
 import { BalancePole } from './catalog/BalancePole';
 import { ChargeThrow } from './catalog/ChargeThrow';
@@ -25,6 +26,8 @@ export const MICROGAMES: readonly MicrogameDefinition[] = [
   {
     id: 'stop-the-gauge',
     verb: '멈춰!',
+    icon: Gauge,
+    input: 'tap',
     description: '바늘이 초록 영역을 지날 때 누른다',
     duration: 3.5,
     component: StopTheGauge,
@@ -32,6 +35,8 @@ export const MICROGAMES: readonly MicrogameDefinition[] = [
   {
     id: 'red-light-green-light',
     verb: '눌러!',
+    icon: Hand,
+    input: 'tap',
     description: '불이 초록으로 바뀌는 순간 누른다 — 빨간불에 누르면 실패',
     duration: 3.2,
     component: RedLightGreen,
@@ -39,6 +44,8 @@ export const MICROGAMES: readonly MicrogameDefinition[] = [
   {
     id: 'dodge-fall',
     verb: '피해!',
+    icon: Weight,
+    input: 'move',
     description: '위에서 떨어지는 쇳덩이를 옆으로 피한다',
     duration: 3.0,
     succeedOnTimeout: true,
@@ -47,6 +54,8 @@ export const MICROGAMES: readonly MicrogameDefinition[] = [
   {
     id: 'pluck-root',
     verb: '뽑아!',
+    icon: Carrot,
+    input: 'drag',
     description: '땅에 박힌 무를 잡고 위로 홱 당긴다',
     duration: 3.0,
     component: PluckRoot,
@@ -54,6 +63,8 @@ export const MICROGAMES: readonly MicrogameDefinition[] = [
   {
     id: 'clean-screen',
     verb: '닦아!',
+    icon: SprayCan,
+    input: 'drag',
     description: '김 서린 창문을 문질러 80% 이상 닦아낸다',
     duration: 4.0,
     component: CleanScreen,
@@ -61,6 +72,8 @@ export const MICROGAMES: readonly MicrogameDefinition[] = [
   {
     id: 'pour-drink',
     verb: '채워!',
+    icon: CupSoda,
+    input: 'tap',
     description: '차오르는 주스를 점선 사이에서 멈춘다 — 넘치면 실패',
     duration: 3.2,
     component: PourDrink,
@@ -68,6 +81,8 @@ export const MICROGAMES: readonly MicrogameDefinition[] = [
   {
     id: 'rocket-mash',
     verb: '연타해!',
+    icon: Rocket,
+    input: 'mash',
     description: '연타로 파워를 채워 로켓을 발사한다',
     duration: 3.5,
     component: RocketMash,
@@ -75,6 +90,8 @@ export const MICROGAMES: readonly MicrogameDefinition[] = [
   {
     id: 'spot-imposter',
     verb: '골라내!',
+    icon: ScanFace,
+    input: 'pick',
     description: '춤추는 표정 중 하나만 다르다 — 그놈을 누른다',
     duration: 3.0,
     component: SpotImposter,
@@ -82,6 +99,8 @@ export const MICROGAMES: readonly MicrogameDefinition[] = [
   {
     id: 'jump-rope',
     verb: '점프!',
+    icon: PersonStanding,
+    input: 'tap',
     description: '줄이 발밑을 지나는 순간 점프한다',
     duration: 3.0,
     component: JumpRope,
@@ -89,6 +108,8 @@ export const MICROGAMES: readonly MicrogameDefinition[] = [
   {
     id: 'balance-pole',
     verb: '세워!',
+    icon: Scale,
+    input: 'move',
     description: '쓰러지려는 막대를 반대쪽을 눌러 버틴다',
     duration: 3.0,
     succeedOnTimeout: true,
@@ -97,6 +118,8 @@ export const MICROGAMES: readonly MicrogameDefinition[] = [
   {
     id: 'swat-fly',
     verb: '잡아!',
+    icon: Bug,
+    input: 'pick',
     description: '칸을 옮겨 다니는 파리를 때린다',
     duration: 3.2,
     component: SwatFly,
@@ -104,6 +127,8 @@ export const MICROGAMES: readonly MicrogameDefinition[] = [
   {
     id: 'goal-keeper',
     verb: '막아!',
+    icon: Goal,
+    input: 'move',
     description: '공이 날아오는 구역으로 골키퍼를 옮긴다',
     duration: 3.0,
     component: GoalKeeper,
@@ -111,6 +136,8 @@ export const MICROGAMES: readonly MicrogameDefinition[] = [
   {
     id: 'count-them',
     verb: '세어!',
+    icon: Apple,
+    input: 'pick',
     description: '튀는 사과가 몇 개인지 고른다',
     duration: 3.5,
     component: CountThem,
@@ -118,6 +145,8 @@ export const MICROGAMES: readonly MicrogameDefinition[] = [
   {
     id: 'shell-game',
     verb: '찾아!',
+    icon: Eye,
+    input: 'pick',
     description: '섞인 컵 중 공이 든 컵을 고른다',
     duration: 3.5,
     component: ShellGame,
@@ -125,6 +154,8 @@ export const MICROGAMES: readonly MicrogameDefinition[] = [
   {
     id: 'turn-crank',
     verb: '돌려!',
+    icon: Cog,
+    input: 'drag',
     description: '밸브를 두 바퀴 돌린다 — 원을 그리며 드래그',
     duration: 3.5,
     component: TurnCrank,
@@ -132,6 +163,8 @@ export const MICROGAMES: readonly MicrogameDefinition[] = [
   {
     id: 'arrow-code',
     verb: '열어!',
+    icon: KeyRound,
+    input: 'keys',
     description: '자물쇠의 화살표를 순서대로 입력한다',
     duration: 3.5,
     component: ArrowCode,
@@ -139,6 +172,8 @@ export const MICROGAMES: readonly MicrogameDefinition[] = [
   {
     id: 'charge-throw',
     verb: '던져!',
+    icon: Target,
+    input: 'hold',
     description: '누르고 있다가 파워가 바구니에 맞을 때 놓는다',
     duration: 3.2,
     component: ChargeThrow,

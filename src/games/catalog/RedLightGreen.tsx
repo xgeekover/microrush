@@ -1,6 +1,7 @@
 import { Hand, Hourglass } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import type { MicrogameProps, Outcome } from '../types';
+import { Hint, Instruction } from '../ui';
 
 type Light = 'red' | 'green';
 
@@ -59,7 +60,7 @@ export function RedLightGreen({ onSuccess, onFail, speedMultiplier }: MicrogameP
         green ? 'bg-emerald-950' : 'bg-red-950'
       }`}
     >
-      <p className="text-2xl font-black tracking-widest text-white/70">{green ? '지금!' : '초록을 기다려…'}</p>
+      <Instruction>{green ? '지금!' : '초록을 기다려…'}</Instruction>
 
       <div
         className={`flex size-52 items-center justify-center rounded-full border-[10px] border-black/50 shadow-[0_14px_0_rgba(0,0,0,0.4)] sm:size-64 ${
@@ -73,9 +74,7 @@ export function RedLightGreen({ onSuccess, onFail, speedMultiplier }: MicrogameP
         )}
       </div>
 
-      <p className="text-sm text-white/50">
-        {done === 'fail' ? '너무 빨랐어!' : done === 'success' ? '딱 맞았어!' : 'Space · 클릭 · 탭'}
-      </p>
+      <Hint>{done === 'fail' ? '너무 빨랐어!' : done === 'success' ? '딱 맞았어!' : 'Space · 클릭 · 탭'}</Hint>
     </div>
   );
 }

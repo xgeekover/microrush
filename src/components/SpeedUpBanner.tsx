@@ -22,11 +22,11 @@ export function SpeedUpBanner({ speedMultiplier }: SpeedUpBannerProps) {
 
       <div className="su-title relative flex items-center gap-4">
         <Zap aria-hidden className="su-bolt size-16 shrink-0 fill-current sm:size-24" />
-        <h2 className="su-text text-[clamp(2.4rem,13vw,9rem)] leading-none font-black tracking-tight">SPEED UP!!</h2>
+        <h2 className="su-text font-display text-[clamp(2.6rem,14vw,10rem)] leading-none tracking-tight">SPEED UP!!</h2>
         <Zap aria-hidden className="su-bolt size-16 shrink-0 fill-current sm:size-24" />
       </div>
 
-      <p data-testid="speed-up-multiplier" className="su-mult relative text-[clamp(1.5rem,5vw,3rem)] font-black tabular-nums">
+      <p data-testid="speed-up-multiplier" className="su-mult relative font-display text-[clamp(1.6rem,5vw,3.2rem)] tabular-nums">
         ×{speedMultiplier.toFixed(2)}
       </p>
     </div>

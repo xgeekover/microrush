@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useFrameLoop, useOutcome } from '../hooks';
 import type { MicrogameProps } from '../types';
+import { Hint, Instruction } from '../ui';
 
 /*
  * 막아! — 키커가 세 구역 중 한 곳으로 찬다. 공이 날아가는 방향을 읽고 골키퍼를 그 구역으로 옮긴다.
@@ -66,9 +67,7 @@ export function GoalKeeper({ onSuccess, onFail, speedMultiplier }: MicrogameProp
       onPointerDown={onPointerDown}
       className="relative h-full w-full cursor-pointer touch-none select-none overflow-hidden bg-gradient-to-b from-sky-300 via-emerald-500 to-emerald-700"
     >
-      <p className="absolute inset-x-0 top-4 text-center text-2xl font-black tracking-widest text-white drop-shadow">
-        공을 막아!
-      </p>
+      <Instruction>공을 막아!</Instruction>
 
       {/* 골문 + 세 구역 */}
       <div className="absolute inset-x-[8%] top-[16%] h-[26%] rounded-t-2xl border-8 border-b-0 border-white bg-white/10 [background-image:repeating-linear-gradient(0deg,rgba(255,255,255,0.25)_0_2px,transparent_2px_16px),repeating-linear-gradient(90deg,rgba(255,255,255,0.25)_0_2px,transparent_2px_16px)]">
@@ -105,7 +104,7 @@ export function GoalKeeper({ onSuccess, onFail, speedMultiplier }: MicrogameProp
           {done === 'success' ? '세이브!' : '골…'}
         </p>
       )}
-      <p className="absolute inset-x-0 bottom-1 text-center text-sm text-white/70">← → · 구역 탭 · 1 2 3</p>
+      <Hint>← → · 구역 탭 · 1 2 3</Hint>
     </div>
   );
 }

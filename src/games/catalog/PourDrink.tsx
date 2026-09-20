@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { useFrameLoop, useOutcome, usePressKey } from '../hooks';
 import type { MicrogameProps } from '../types';
+import { Hint, Instruction } from '../ui';
 
 /*
  * 채워! — 컵에 주스가 차오른다. 점선 타겟(70~90%) 안에서 멈추면 성공.
@@ -51,9 +52,7 @@ export function PourDrink({ onSuccess, onFail, speedMultiplier }: MicrogameProps
       onPointerDown={stop}
       className="relative flex h-full w-full cursor-pointer flex-col items-center justify-end overflow-hidden bg-gradient-to-b from-rose-950 to-rush-bg pb-[8%]"
     >
-      <p className="absolute inset-x-0 top-6 text-center text-2xl font-black tracking-widest text-white/70">
-        점선까지 채워!
-      </p>
+      <Instruction>점선까지 채워!</Instruction>
 
       {/* 주스 줄기 (멈추면 사라진다) */}
       {!stopped && (
@@ -87,9 +86,7 @@ export function PourDrink({ onSuccess, onFail, speedMultiplier }: MicrogameProps
         <div className="pointer-events-none absolute inset-x-0 bottom-[6%] h-[10%] animate-pop rounded-t-[50%] bg-orange-400/80" />
       )}
 
-      <p className="absolute inset-x-0 bottom-3 text-center text-sm text-white/50">
-        {done === 'success' ? '완벽한 한 잔!' : overflow ? '넘쳤어!' : short ? '너무 적어…' : 'Space · 클릭 · 탭'}
-      </p>
+      <Hint>{done === 'success' ? '완벽한 한 잔!' : overflow ? '넘쳤어!' : short ? '너무 적어…' : 'Space · 클릭 · 탭'}</Hint>
     </div>
   );
 }

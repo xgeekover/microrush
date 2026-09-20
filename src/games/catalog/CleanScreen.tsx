@@ -2,6 +2,7 @@ import { Cloud, Sun } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useOutcome } from '../hooks';
 import type { MicrogameProps } from '../types';
+import { Instruction } from '../ui';
 
 /*
  * 닦아! — 김 서린 창문을 마우스로 문질러 80% 이상 걷어낸다.
@@ -106,9 +107,7 @@ export function CleanScreen({ onSuccess, onFail }: MicrogameProps) {
       <Cloud className="absolute left-[8%] top-[18%] size-24 fill-white text-white/80" />
       <Cloud className="absolute left-[38%] top-[8%] size-16 fill-white text-white/80" />
       <div className="absolute inset-x-0 bottom-0 h-[28%] rounded-t-[50%_100%] bg-emerald-500" />
-      <p className="absolute inset-x-0 top-6 z-20 text-center text-2xl font-black tracking-widest text-slate-700/70">
-        문질러 닦아!
-      </p>
+      <Instruction>문질러 닦아!</Instruction>
 
       {/* 김 서린 타일 */}
       <div

@@ -52,7 +52,7 @@ const PARTICLES: readonly Particle[] = Array.from({ length: PARTICLE_COUNT }, (_
 });
 
 const POPUP_BASE =
-  'fx-pop rounded-3xl border-8 border-black/30 px-10 py-5 text-[clamp(2.5rem,9vw,5.5rem)] leading-none font-black tracking-tight shadow-[0_10px_0_rgba(0,0,0,0.35)]';
+  'fx-pop rounded-[2rem] border border-white/25 px-10 py-5 font-display text-[clamp(2.75rem,10vw,6.5rem)] leading-none tracking-tight';
 
 /** 성공/실패 판정 순간의 전체 화면 피드백 */
 export function ResultOverlay({ outcome }: { outcome: Outcome }): JSX.Element {
@@ -67,7 +67,7 @@ export function ResultOverlay({ outcome }: { outcome: Outcome }): JSX.Element {
         <>
           {/* 가장자리 초록 플래시 */}
           <div aria-hidden className="fx-edge-flash absolute inset-0" />
-          <div className={`${POPUP_BASE} relative bg-rush-green text-rush-bg`}>SUCCESS!</div>
+          <div className={`${POPUP_BASE} relative bg-gradient-to-b from-rush-green to-emerald-500 text-rush-bg shadow-[0_30px_70px_-24px_rgba(52,226,154,0.8)]`}>SUCCESS!</div>
           {/* 파티클 — 카드가 넓어 뒤에 두면 가려지므로 DOM 상 뒤(= 화면 앞)에 둔다 */}
           <div aria-hidden className="absolute inset-0">
             {PARTICLES.map((p, i) => (
@@ -80,8 +80,8 @@ export function ResultOverlay({ outcome }: { outcome: Outcome }): JSX.Element {
           {/* 붉은 비네트 플래시 */}
           <div aria-hidden className="fx-vignette absolute inset-0" />
           <div className="relative flex flex-col items-center gap-3">
-            <div className={`${POPUP_BASE} bg-rush-red text-white`}>MISS!</div>
-            <div className="fx-heart-loss text-2xl font-black text-white drop-shadow">♥ −1</div>
+            <div className={`${POPUP_BASE} bg-gradient-to-b from-rush-red to-rose-600 text-white shadow-[0_30px_70px_-24px_rgba(255,77,103,0.8)]`}>MISS!</div>
+            <div className="fx-heart-loss rounded-full bg-black/40 px-4 py-1.5 font-display text-2xl text-white backdrop-blur-sm">♥ −1</div>
           </div>
         </>
       )}

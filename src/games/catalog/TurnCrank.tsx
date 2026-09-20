@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { capturePointer, useFrameLoop, useOutcome } from '../hooks';
 import type { MicrogameProps } from '../types';
+import { Hint, Instruction } from '../ui';
 
 /*
  * 돌려! — 밸브를 두 바퀴 돌리면 물이 나온다.
@@ -89,9 +90,7 @@ export function TurnCrank({ onSuccess, onFail }: MicrogameProps) {
       onPointerCancel={onUp}
       className="relative flex h-full w-full cursor-grab touch-none select-none flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-slate-600 to-slate-800 active:cursor-grabbing"
     >
-      <p className="absolute inset-x-0 top-6 text-center text-2xl font-black tracking-widest text-white/70">
-        밸브를 두 바퀴!
-      </p>
+      <Instruction>밸브를 두 바퀴!</Instruction>
 
       {/* 파이프 + 물 */}
       <div className="absolute right-[12%] top-[38%] h-8 w-[40%] rounded-full bg-slate-400 shadow-inner" />
@@ -115,9 +114,7 @@ export function TurnCrank({ onSuccess, onFail }: MicrogameProps) {
         <span className="absolute top-2 size-4 rounded-full bg-rush-yellow" />
       </div>
 
-      <p className="absolute inset-x-0 bottom-4 text-center text-sm text-white/50">
-        {done === 'success' ? '콸콸!' : `누른 채 원을 그리며 드래그 · ← → 홀드 (${Math.floor(progress * TURNS * 10) / 10}/${TURNS} 바퀴)`}
-      </p>
+      <Hint>{done === 'success' ? '콸콸!' : `누른 채 원을 그리며 드래그 · ← → 홀드 (${Math.floor(progress * TURNS * 10) / 10}/${TURNS} 바퀴)`}</Hint>
     </div>
   );
 }

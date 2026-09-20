@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useOutcome } from '../hooks';
 import type { MicrogameProps } from '../types';
+import { Instruction } from '../ui';
 
 /*
  * 세어! — 통통 튀는 사과가 몇 개인지 센다. 세 보기 중 맞는 수를 고르면 성공, 틀리면 즉시 실패.
@@ -55,9 +56,7 @@ export function CountThem({ onSuccess, onFail, speedMultiplier }: MicrogameProps
       data-done={done ?? ''}
       className="relative h-full w-full select-none overflow-hidden bg-gradient-to-b from-rose-100 to-rose-300"
     >
-      <p className="absolute inset-x-0 top-6 text-center text-2xl font-black tracking-widest text-rose-950/70">
-        사과가 몇 개?
-      </p>
+      <Instruction>사과가 몇 개?</Instruction>
 
       {layout.items.map((it, i) => (
         <span

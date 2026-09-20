@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { capturePointer, useFrameLoop, useOutcome } from '../hooks';
 import type { MicrogameProps } from '../types';
+import { Hint, Instruction } from '../ui';
 
 /*
  * 던져! — 누르고 있으면 파워가 0 → 100 → 0 으로 오르내린다. 바구니(65~85%)에 맞춰 놓으면 골인.
@@ -79,9 +80,7 @@ export function ChargeThrow({ onSuccess, onFail, speedMultiplier }: MicrogamePro
       onPointerCancel={release}
       className="relative h-full w-full cursor-pointer touch-none select-none overflow-hidden bg-gradient-to-b from-indigo-300 to-indigo-600"
     >
-      <p className="absolute inset-x-0 top-6 text-center text-2xl font-black tracking-widest text-indigo-950/70">
-        누르고 있다가 바구니에 놓아!
-      </p>
+      <Instruction>누르고 있다가 바구니에 놓아!</Instruction>
 
       {/* 바닥 · 바구니 (파워 65~85% 위치) */}
       <div className="absolute inset-x-0 bottom-0 h-[22%] bg-indigo-900" />
@@ -103,9 +102,7 @@ export function ChargeThrow({ onSuccess, onFail, speedMultiplier }: MicrogamePro
           <div className="absolute inset-y-0 bg-rush-yellow/30" style={{ left: `${ZONE[0]}%`, width: `${ZONE[1] - ZONE[0]}%` }} />
           <div className={`h-full transition-none ${inZone ? 'bg-rush-green' : 'bg-gradient-to-r from-sky-400 to-rush-pink'}`} style={{ width: `${shown}%` }} />
         </div>
-        <p className="mt-2 text-center text-sm text-white/70">
-          {done === 'success' ? '골인!' : done === 'fail' ? (shown < ZONE[0] ? '짧았어…' : '넘어갔어…') : holding ? '놓아!' : 'Space · 화면을 누르고 있어'}
-        </p>
+        <Hint>{done === 'success' ? '골인!' : done === 'fail' ? (shown < ZONE[0] ? '짧았어…' : '넘어갔어…') : holding ? '놓아!' : 'Space · 화면을 누르고 있어'}</Hint>
       </div>
     </div>
   );

@@ -1,12 +1,12 @@
-import { Gamepad2, Play, Zap } from 'lucide-react';
 import { useCallback, useEffect, useReducer, useState } from 'react';
 import { BombTimer } from '../components/BombTimer';
 import { GameOverModal } from '../components/GameOverModal';
 import { ResultOverlay } from '../components/FeedbackFX';
 import { HUD } from '../components/HUD';
+import { Lobby } from '../components/Lobby';
 import { SpeedUpBanner } from '../components/SpeedUpBanner';
 import { VerbBanner } from '../components/VerbBanner';
-import { MICROGAMES, pickNextGame } from '../games/registry';
+import { pickNextGame } from '../games/registry';
 import type { MicrogameDefinition, Outcome } from '../games/types';
 import { RUSH, playDurationMs, speedMultiplierFor } from './config';
 import { SoundManager } from './SoundManager';
@@ -48,6 +48,7 @@ interface RushState {
 
 type Action =
   | { type: 'START'; game: MicrogameDefinition }
+  | { type: 'LOBBY' }
   | { type: 'PLAY' }
   | { type: 'RESOLVE'; outcome: Outcome; ratio: number; timedOut?: boolean }
   | { type: 'RESULT_DONE'; nextGame: MicrogameDefinition }
@@ -73,6 +74,8 @@ function reducer(s: RushState, a: Action): RushState {
   switch (a.type) {
     case 'START':
       return { ...initialState(), best: s.best, phase: 'READY', game: a.game, recent: [a.game.id], stage: 1 };
+    case 'LOBBY':
+      return s.phase === 'GAMEOVER' ? { ...initialState(), best: s.best } : s;
     case 'PLAY':
       return s.phase === 'READY' ? { ...s, phase: 'PLAYING' } : s;
     case 'RESOLVE': {
@@ -131,6 +134,7 @@ export function GameController() {
     sound.unlock();
     dispatch({ type: 'START', game: pickNextGame([]) });
   }, [sound]);
+  const toLobby = useCallback(() => dispatch({ type: 'LOBBY' }), []);
 
   // 마이크로게임에 넘기는 판정 콜백. 참조가 바뀌지 않으므로 게임이 effect 의존성에 넣어도 안전하다.
   // 판정 순간의 도화선 길이는 렌더된 값(최대 1프레임 늦음)이 아니라 시계에서 직접 읽는다.
@@ -206,6 +210,14 @@ export function GameController() {
     if (timedOut) sound.fusePop();
     if (outcome === 'success') sound.success(delay);
     else sound.fail(delay);
+    // 폰에서는 실패를 손끝으로도 알린다 (지원 안 하는 브라우저는 조용히 넘어간다)
+    if (outcome === 'fail') {
+      try {
+        navigator.vibrate?.(60);
+      } catch {
+        /* 무시 */
+      }
+    }
     const t = window.setTimeout(
       () => dispatch({ type: 'RESULT_DONE', nextGame: pickNextGame(recent) }),
       RUSH.resultMs,
@@ -248,8 +260,9 @@ export function GameController() {
   return (
     <div
       data-phase={phase}
-      className={`flex h-full flex-col bg-rush-bg ${phase === 'RESULT' && outcome === 'fail' ? 'fx-shake' : ''}`}
+      className={`relative flex h-dvh flex-col ${phase === 'RESULT' && outcome === 'fail' ? 'fx-shake' : ''}`}
     >
+      <Backdrop />
       <HUD
         hearts={hearts}
         score={score}
@@ -259,7 +272,7 @@ export function GameController() {
         onToggleMute={() => setMuted((m) => !m)}
       />
 
-      <main className="relative min-h-0 flex-1 overflow-hidden">
+      <main className="relative z-10 min-h-0 flex-1 overflow-hidden">
         {phase === 'LOBBY' && <Lobby best={best} onStart={start} />}
 
         {showGame && game && Game && (
@@ -274,10 +287,12 @@ export function GameController() {
           </div>
         )}
 
-        {phase === 'READY' && game && <VerbBanner verb={game.verb} stage={stage} />}
+        {phase === 'READY' && game && <VerbBanner verb={game.verb} stage={stage} icon={game.icon} input={game.input} />}
         {phase === 'RESULT' && outcome && <ResultOverlay outcome={outcome} />}
         {phase === 'SPEED_UP' && <SpeedUpBanner speedMultiplier={speed} />}
-        {phase === 'GAMEOVER' && <GameOverModal score={score} best={best} onRestart={start} />}
+        {phase === 'GAMEOVER' && (
+          <GameOverModal score={score} best={best} stage={stage} speedMultiplier={speed} onRestart={start} onLobby={toLobby} />
+        )}
       </main>
 
       {/* RESULT 동안은 판정 순간의 길이로 멎어 있고, 도화선이 다 타서 끝났으면 펑 */}
@@ -290,43 +305,14 @@ export function GameController() {
   );
 }
 
-function Lobby({ best, onStart }: { best: number; onStart: () => void }) {
+/** 로비 · 게임 오버 뒤에 깔리는 빛덩이. 게임 화면은 자기 배경으로 덮는다 */
+function Backdrop() {
   return (
-    // 화면 어디든 탭하면 시작. button 은 블록 요소를 담을 수 없어 div 로 둔다 (키보드 시작은 컨트롤러가 듣는다).
-    <div
-      data-testid="lobby"
-      onClick={onStart}
-      className="flex h-full w-full cursor-pointer flex-col items-center gap-5 overflow-y-auto px-6 py-6 text-center sm:justify-center"
-    >
-      <div className="flex items-center gap-3">
-        <Zap aria-hidden className="size-14 fill-rush-yellow text-rush-yellow drop-shadow-[0_4px_0_rgba(0,0,0,0.4)]" />
-        <h1 className="text-[clamp(3rem,10vw,6rem)] leading-none font-black tracking-tight text-rush-yellow drop-shadow-[0_6px_0_rgba(0,0,0,0.4)]">
-          MicroRush
-        </h1>
-      </div>
-      <p className="max-w-md text-base text-white/70">
-        3초짜리 마이크로게임이 쉴 새 없이 이어진다. 지시어를 읽고, 바로 해내고, 다음으로. 하트 {RUSH.hearts}개가
-        전부 사라지면 끝.
-      </p>
-
-      <ul className="grid w-full max-w-4xl grid-cols-2 gap-2 text-left text-xs sm:grid-cols-3 sm:text-sm">
-        {MICROGAMES.map((g) => (
-          <li key={g.id} className="rounded-2xl border-2 border-white/15 bg-white/5 px-3 py-2 sm:px-4 sm:py-3">
-            <div className="text-base font-black text-rush-cyan sm:text-lg">{g.verb}</div>
-            <div className="text-white/70">{g.description}</div>
-          </li>
-        ))}
-      </ul>
-
-      <div className="animate-blink flex items-center gap-2 rounded-full bg-rush-pink px-6 py-3 text-lg font-black text-white shadow-[0_6px_0_rgba(0,0,0,0.35)]">
-        <Play aria-hidden className="size-5 fill-current" /> SPACE / 탭하여 시작
-      </div>
-
-      <p className="text-xs text-white/50">
-        <Gamepad2 aria-hidden className="mr-1 inline size-4" />
-        조작: Space · 클릭 · 탭 = 누르기 / ← → · A D · 드래그 = 이동·회전 / 1~9 = 고르기 / M = 음소거
-        {best > 0 && <span className="ml-3 font-black text-rush-yellow">BEST {best}</span>}
-      </p>
+    <div aria-hidden className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+      <div className="bg-dots absolute inset-0 opacity-70" />
+      <div className="animate-float absolute -top-32 -left-24 size-[28rem] rounded-full bg-rush-violet/30 blur-3xl" />
+      <div className="animate-float absolute -right-24 top-1/4 size-[24rem] rounded-full bg-rush-pink/20 blur-3xl" style={{ animationDelay: '-4s' }} />
+      <div className="animate-float absolute -bottom-32 left-1/3 size-[26rem] rounded-full bg-rush-cyan/15 blur-3xl" style={{ animationDelay: '-7s' }} />
     </div>
   );
 }

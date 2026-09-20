@@ -6,6 +6,10 @@
 
 설치 없이 데스크톱(마우스 · 키보드)과 폰(터치) 모두에서 된다. 소리는 첫 탭/클릭 뒤에 난다. 기록은 각자의 브라우저에만 저장된다.
 
+![로비](docs/lobby.jpg)
+
+<p align="center"><img src="docs/verb.jpg" width="46%" alt="지시어 배너 — 뽑아!" /> &nbsp; <img src="docs/play-phone.png" width="21%" alt="폰 세로 플레이 화면 — 골라내!" /> &nbsp; <img src="docs/game-over.jpg" width="30%" alt="게임 오버 카드" /></p>
+
 ## 실행
 
 ```bash
@@ -30,6 +34,7 @@ npm run lint     # oxlint
 | 마우스 문지르기 (호버 · 드래그) | "닦아!" — 커서가 지나간 타일이 지워진다 |
 | 클릭 / 탭 (대상 지정) | "골라내!" — 다른 하나를 누른다 |
 | `M` / 우상단 버튼 | 음소거 |
+| 게임 오버의 "처음으로" | 로비로 돌아간다 (다시 도전은 곧바로 새 판) |
 
 ## 코어 루프
 
@@ -60,6 +65,17 @@ LOBBY ─시작─▶ READY(지시어 0.6s) ─▶ PLAYING(3~4s ÷ 템포) ─�
 | 도화선 펑 | 노이즈 30ms + 220 → 70Hz 팝 — 시간 초과 순간, 판정음 직전 |
 
 모든 이벤트는 `sound.log`(최근 200개, `{event, t, ratio}`)에 남는다. 음소거여도 기록되므로 헤드리스 검증이 소리 대신 이 로그로 째깍 가속을 확인한다. 개발 빌드에서는 `window.__microrush.sound` 로 열려 있다.
+
+## 화면 디자인 (`src/index.css` · `src/components/Lobby.tsx` · `src/games/ui.tsx`)
+
+짙은 남보라 바탕에 네온 강조 5색(노랑 · 핑크 · 시안 · 초록 · 빨강), 반투명 유리 패널, 큰 라운드, 두 벌의 글꼴 — 지시어 · 제목 · 숫자는 **Black Han Sans**, 본문은 **Pretendard**(둘 다 OFL, CDN 에서 받고 실패하면 시스템 폰트). 색 · 글꼴 · 애니메이션은 `index.css` 의 `@theme` 토큰과 `@utility` 조각(`glass` · `chip` · `btn-primary` · `btn-ghost` · `kbd-hint`)으로만 쓰고 컴포넌트에 hex 를 적지 않는다.
+
+- **로비** — 제목 → 한 줄 설명 → 세 단계(읽고 · 해내고 · 다음) → 게임 17종 카드(아이콘 · 조작 종류 · 설명) → 조작 안내. **시작 버튼은 스크롤과 무관하게 항상 아래에 떠 있다**(스크롤 컨테이너 안의 `sticky bottom-0`). 화면 어디를 눌러도 시작하되, 카드 영역은 읽는 곳이라 눌러도 시작하지 않는다.
+- **HUD** — 노치 아래로 내려앉는 유리 바. 하트(마지막 하나는 맥동) · SCORE · STAGE · 템포 알약 · 44px 음소거 버튼.
+- **지시어 배너** — 노란 바탕에 퍼지는 동심원, 게임 아이콘, 아주 큰 지시어, 그리고 **조작 종류 알약**(탭 · 홀드 · 드래그 · 좌우 · 연타 · 고르기 · 화살표) — 처음 보는 게임이라도 손이 먼저 간다.
+- **게임 안** — 17종의 지시문과 힌트는 `Instruction` · `Hint` 두 조각으로 통일했다. 배경색이 게임마다 달라도 짙은 반투명 알약 안의 흰 글자라 어디서든 읽힌다.
+- **게임 오버** — 유리 카드에 점수 · 최고 · NEW BEST · 도달 스테이지 · 최고 템포, 그리고 다시 도전(주) / 처음으로(보조).
+- 세로 폰은 `100dvh` 와 `env(safe-area-inset-*)` 로 노치 · 홈 인디케이터를 피하고, 가로 폰(높이 480px 이하)은 `[@media(max-height:480px)]` 변형으로 제목 · 여백 · 통계를 줄인다. 실패 판정에는 `navigator.vibrate` 로 짧은 진동(지원 기기만). `prefers-reduced-motion` 에서는 떠오름 · 부유 애니메이션을 끈다.
 
 ## 연출 (`src/components/FeedbackFX.tsx` · `BombTimer.tsx` · `SpeedUpBanner.tsx`)
 
@@ -109,10 +125,12 @@ LOBBY ─시작─▶ READY(지시어 0.6s) ─▶ PLAYING(3~4s ÷ 템포) ─�
 2. `src/games/registry.ts` 의 `MICROGAMES` 에 한 줄 추가한다 — 그 순간부터 랜덤 추첨 풀에 들어간다.
 
    ```ts
-   { id: 'my-game', verb: '잡아!', description: '…', duration: 3.0, component: MyGame },
+   { id: 'my-game', verb: '잡아!', icon: Bug, input: 'pick', description: '…', duration: 3.0, component: MyGame },
    ```
 
-   시간이 다 됐을 때 성공으로 쳐야 하는 게임("피해!" 처럼 버티는 게임)은 `succeedOnTimeout: true`.
+   `icon` 은 lucide 아이콘(로비 카드 · 지시어 배너에 나온다), `input` 은 조작 종류(`tap` · `hold` · `drag` · `move` · `mash` · `pick` · `keys` — 지시어 아래 알약으로 보여준다). 시간이 다 됐을 때 성공으로 쳐야 하는 게임("피해!" 처럼 버티는 게임)은 `succeedOnTimeout: true`.
+
+3. 지시문과 힌트는 `src/games/ui.tsx` 의 `<Instruction>` · `<Hint>` 로 쓴다 — 배경색과 무관하게 읽히는 공용 알약이다.
 
 게임은 자기 입력을 직접 듣는다(`onPointerDown`, `window` 의 `keydown`). 판정을 한 번 내렸으면 자기 애니메이션을 멈추는 것은 게임의 몫이다 — 결과 팡파르 0.8초 동안 화면에 그대로 남아 있기 때문이다.
 
@@ -120,11 +138,13 @@ LOBBY ─시작─▶ READY(지시어 0.6s) ─▶ PLAYING(3~4s ÷ 템포) ─�
 
 | 경로 | 역할 |
 |---|---|
-| `src/core/GameController.tsx` | 상태 머신 · 로비 · 하위 화면 조립 |
+| `src/core/GameController.tsx` | 상태 머신 · 배경 · 하위 화면 조립 |
+| `src/components/Lobby.tsx` | 첫 화면 — 제목 · 세 단계 · 게임 카탈로그 · 항상 보이는 시작 바 |
+| `src/games/ui.tsx` | 마이크로게임 공용 지시문 · 힌트 알약 |
 | `src/core/config.ts` | 템포 상수 · 배율 사다리 `SPEED_STEPS` · 제한 시간 / 째깍 간격 공식 |
 | `src/core/useGameLoop.ts` | 한 판의 rAF 시계 — 남은 비율 · 째깍 스케줄 · 시간 초과 |
 | `src/core/SoundManager.ts` | Web Audio 합성음 8종 + 이벤트 로그 |
-| `src/games/types.ts` | `MicrogameProps` · `MicrogameDefinition` |
+| `src/games/types.ts` | `MicrogameProps` · `MicrogameDefinition`(아이콘 · 조작 종류 포함) · `INPUT_LABELS` |
 | `src/games/registry.ts` | 등록 목록 17종 + 최근 3개를 피하는 추첨 |
 | `src/games/catalog/StopTheGauge.tsx` | 멈춰! — 바늘이 초록 영역일 때 누른다 |
 | `src/games/catalog/RedLightGreen.tsx` | 눌러! — 초록불로 바뀌는 순간 누른다 (빨간불에 누르면 실패) |
@@ -135,6 +155,7 @@ LOBBY ─시작─▶ READY(지시어 0.6s) ─▶ PLAYING(3~4s ÷ 템포) ─�
 | `src/components/HUD.tsx` · `BombTimer.tsx` · `VerbBanner.tsx` | 하트(깨짐 애니메이션)·점수·템포 / 도화선 타이머(불꽃 · 스파크 · 펑) / 지시어 팝업 |
 | `src/components/FeedbackFX.tsx` · `SpeedUpBanner.tsx` · `GameOverModal.tsx` | 성공/실패 연출(파티클 · 비네트 · 팝업) / SPEED UP!! 배너 / 게임 오버 모달 |
 | `src/utils/storage.ts` | LocalStorage — 최고 점수 · 설정(음소거) |
+| `src/index.css` | 디자인 토큰(`@theme`) · 공용 조각(`@utility`) · 배경 |
 | `src/styles/*.css` | 연출별 keyframe (`fx-` · `bomb-` · `su-` 접두어) |
 
 ## 검증

@@ -1,4 +1,18 @@
+import type { LucideIcon } from 'lucide-react';
 import type { ComponentType } from 'react';
+
+/** 게임이 요구하는 조작의 종류 — 로비 카드와 지시어 배너에 라벨로 보여준다 */
+export type InputKind = 'tap' | 'hold' | 'drag' | 'move' | 'mash' | 'pick' | 'keys';
+
+export const INPUT_LABELS: Record<InputKind, string> = {
+  tap: '탭',
+  hold: '홀드',
+  drag: '드래그',
+  move: '좌우',
+  mash: '연타',
+  pick: '고르기',
+  keys: '화살표',
+};
 
 /**
  * 모든 마이크로게임이 받는 표준 Props.
@@ -24,6 +38,10 @@ export interface MicrogameDefinition {
   verb: string;
   /** 로비 목록에 보여줄 한 줄 설명 */
   description: string;
+  /** 로비 카드 · 지시어 배너의 아이콘 (lucide) */
+  icon: LucideIcon;
+  /** 어떤 조작인지 — 지시어와 함께 보여줘 첫 판에도 손이 먼저 간다 */
+  input: InputKind;
   /** 기본 제한 시간(초). 실제 시간은 speedMultiplier 로 나눈 값이다. */
   duration: number;
   /**

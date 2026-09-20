@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useOutcome } from '../hooks';
 import type { MicrogameProps } from '../types';
+import { Hint, Instruction } from '../ui';
 
 /*
  * 찾아! — 공을 보여주고 컵을 덮은 뒤 몇 번 섞는다. 공이 든 컵을 고르면 성공, 아니면 즉시 실패.
@@ -84,9 +85,7 @@ export function ShellGame({ onSuccess, onFail, speedMultiplier }: MicrogameProps
       data-done={done ?? ''}
       className="relative h-full w-full select-none overflow-hidden bg-gradient-to-b from-amber-100 to-amber-300"
     >
-      <p className="absolute inset-x-0 top-6 text-center text-2xl font-black tracking-widest text-amber-950/70">
-        {stage === 'show' ? '공을 잘 봐…' : stage === 'shuffle' ? '섞는다!' : '어느 컵?'}
-      </p>
+      <Instruction>{stage === 'show' ? '공을 잘 봐…' : stage === 'shuffle' ? '섞는다!' : '어느 컵?'}</Instruction>
 
       {/* 탁자 */}
       <div className="absolute inset-x-0 bottom-0 h-[30%] bg-amber-700" />
@@ -112,9 +111,7 @@ export function ShellGame({ onSuccess, onFail, speedMultiplier }: MicrogameProps
         </button>
       ))}
 
-      <p className="absolute inset-x-0 bottom-4 text-center text-sm text-amber-950/60">
-        {done === 'success' ? '찾았다!' : done === 'fail' ? '거기가 아니야…' : '컵 탭 · 1 2 3'}
-      </p>
+      <Hint>{done === 'success' ? '찾았다!' : done === 'fail' ? '거기가 아니야…' : '컵 탭 · 1 2 3'}</Hint>
     </div>
   );
 }
