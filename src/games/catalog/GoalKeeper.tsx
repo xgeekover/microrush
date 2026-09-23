@@ -87,7 +87,7 @@ export function GoalKeeper({ onSuccess, onFail, speedMultiplier }: MicrogameProp
 
       {/* 골키퍼: 팔을 벌린 선수 + 장갑 */}
       <div
-        className="absolute top-[20%] h-[24%] w-[16%] -translate-x-1/2 transition-[left] duration-150 ease-out"
+        className="absolute top-[20%] h-[24%] w-[16%] transition-[left] duration-150 ease-out"
         style={{ left: `${ZONE_X[keeper]}%`, transform: `translateX(-50%) ${done === 'fail' ? 'rotate(-18deg)' : done === 'success' ? 'scale(1.12)' : ''}` }}
       >
         <Person className="h-full w-full drop-shadow-[0_10px_10px_rgba(0,0,0,0.45)]" pose={done === 'fail' ? 'fall' : 'cheer'} shirt={done === 'success' ? '#34e29a' : '#f59e0b'} />
@@ -96,7 +96,7 @@ export function GoalKeeper({ onSuccess, onFail, speedMultiplier }: MicrogameProp
       </div>
 
       {/* 공 — 날아갈수록 작아지고, 그림자는 발 앞에서만 */}
-      <div className={`absolute w-[9%] -translate-x-1/2 -translate-y-1/2 ${!flying && t < 0 ? 'animate-[fx-jitter_0.2s_linear_infinite]' : ''}`} style={{ left: `${ballX}%`, top: `${ballY}%`, transform: `translate(-50%, -50%) scale(${ballScale})` }}>
+      <div className={`absolute w-[9%] ${!flying && t < 0 ? 'animate-[fx-jitter_0.2s_linear_infinite]' : ''}`} style={{ left: `${ballX}%`, top: `${ballY}%`, transform: `translate(-50%, -50%) scale(${ballScale})` }}>
         <svg viewBox="0 0 100 100" className="w-full drop-shadow-[0_10px_10px_rgba(0,0,0,0.45)]" aria-hidden>
           <defs><radialGradient id="gk-ball" cx="0.35" cy="0.3" r="0.8"><stop offset="0" stopColor="#ffffff" /><stop offset="1" stopColor="#cbd5e1" /></radialGradient></defs>
           <circle cx="50" cy="50" r="46" fill="url(#gk-ball)" stroke="#334155" strokeWidth="2" />

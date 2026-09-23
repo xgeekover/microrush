@@ -19,7 +19,13 @@ const TORQUE = 150; // deg/s²
 
 export function BalancePole({ onSuccess, onFail, speedMultiplier }: MicrogameProps) {
   const { done, finish, isDone } = useOutcome(onSuccess, onFail);
-  const [init] = useState(() => ({ a: (Math.random() < 0.5 ? -1 : 1) * (7 + Math.random() * 5), v: (Math.random() - 0.5) * 16 }));
+  // 처음 기울기와 처음 각속도는 **같은 방향**이어야 한다 — "가만히 두면 쓰러진다"가 이 게임의 전제이기 때문이다.
+  // 반대 방향으로 뽑히면 막대가 중심을 지나 반대편으로 넘어가느라 제한 시간을 넘겨, 아무것도 안 했는데 성공하는
+  // 맥 빠지는 판이 나온다 (무입력 10만 회 시뮬: ×1.00 에서 8.2% · ×1.45 에서 1.4%). 같은 방향이면 어느 배율에서도 0%.
+  const [init] = useState(() => {
+    const dir = Math.random() < 0.5 ? -1 : 1;
+    return { a: dir * (7 + Math.random() * 5), v: dir * Math.random() * 8 };
+  });
   const sim = useRef({ ...init });
   const input = useRef(0); // -1 왼쪽으로 밀기, +1 오른쪽으로 밀기
   const [angle, setAngle] = useState(init.a);
@@ -108,7 +114,7 @@ export function BalancePole({ onSuccess, onFail, speedMultiplier }: MicrogamePro
       <span className="absolute right-6 top-1/2 -translate-y-1/2 font-display text-5xl text-black/30">▶</span>
 
       {/* 막대 + 접시: 손바닥 위의 점을 축으로 회전 */}
-      <div className="absolute bottom-[24%] left-1/2 h-[54%] w-14 origin-bottom -translate-x-1/2" style={{ transform: `translateX(-50%) rotate(${shown}deg)`, transition: fallen ? 'transform 0.35s ease-in' : undefined }}>
+      <div className="absolute bottom-[24%] left-1/2 h-[54%] w-14 origin-bottom" style={{ transform: `translateX(-50%) rotate(${shown}deg)`, transition: fallen ? 'transform 0.35s ease-in' : undefined }}>
         <svg viewBox="0 0 56 300" className="h-full w-full overflow-visible" aria-hidden>
           <defs>
             <linearGradient id="bp-wood" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#5b3a1e" /><stop offset="0.5" stopColor="#b8814a" /><stop offset="1" stopColor="#5b3a1e" /></linearGradient>

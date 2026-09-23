@@ -95,8 +95,21 @@ export function ShellGame({ onSuccess, onFail, speedMultiplier }: MicrogameProps
         <span key={x} aria-hidden className="absolute bottom-[27%] -translate-x-1/2 font-display text-lg text-white/50" style={{ left: `${x}%` }}>{i + 1}</span>
       ))}
 
-      {/* 공 — 공이 든 컵의 자리를 따라간다 */}
-      <div className="absolute bottom-[33%] size-10 -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_35%_30%,#ffb3b3,#e11d2f_45%,#7f0d18)] shadow-[0_6px_10px_rgba(0,0,0,0.4)] transition-[left] duration-300" style={{ left: `${SLOT_X[ballSlot]}%` }} />
+      {/*
+        공 — 컵이 들려 있을 때(처음 보여줄 때 · 판정 후)만 보인다.
+        컵에 가려지기를 기대하는 대신 아예 지우는 이유: 화면 비율에 따라 컵 실루엣의 크기가 달라져
+        (폰 세로에서는 더 작다) 옆으로 삐져나올 수 있고, "숨겼는데 보이면" 게임이 성립하지 않는다.
+        컵이 내려앉는 0.3초 동안 함께 사라지므로 "컵이 덮었다"로 읽힌다.
+      */}
+      <div
+        aria-hidden
+        data-testid="shell-ball"
+        data-visible={lifted}
+        className={`absolute bottom-[33%] size-10 -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_35%_30%,#ffb3b3,#e11d2f_45%,#7f0d18)] shadow-[0_6px_10px_rgba(0,0,0,0.4)] transition-[left,opacity,scale] duration-300 ${
+          lifted ? 'scale-100 opacity-100' : 'scale-50 opacity-0'
+        } ${done ? 'animate-pop' : ''}`}
+        style={{ left: `${SLOT_X[ballSlot]}%`, zIndex: 1 }}
+      />
 
       {/* 컵 3개 */}
       {[0, 1, 2].map((cup) => (
@@ -107,7 +120,8 @@ export function ShellGame({ onSuccess, onFail, speedMultiplier }: MicrogameProps
           data-slot={slots[cup]}
           aria-label={`${slots[cup] + 1}번 컵`}
           onPointerDown={() => pickSlot(slots[cup])}
-          className="absolute bottom-[32%] h-36 w-28 -translate-x-1/2 transition-[left,transform] duration-300 sm:w-32"
+          /* 가로 가운데 맞춤은 인라인 transform 이 한다 — 클래스로 또 옮기면 translate 속성과 겹쳐 두 배로 밀린다 */
+          className="absolute bottom-[32%] h-36 w-28 transition-[left,transform] duration-300 sm:w-32"
           style={{ left: `${SLOT_X[slots[cup]]}%`, transform: `translateX(-50%) translateY(${lifted ? -78 : 0}px)`, zIndex: 2 }}
         >
           <svg viewBox="0 0 100 130" className="h-full w-full overflow-visible drop-shadow-[0_14px_14px_rgba(0,0,0,0.4)]" aria-hidden>

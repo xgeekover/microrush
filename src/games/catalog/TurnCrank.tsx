@@ -198,7 +198,7 @@ export function TurnCrank({ onSuccess, onFail }: MicrogameProps) {
         >
           <div className="crank-rim absolute inset-0 rounded-full" />
           {SPOKES.map((d) => (
-            <span key={d} className="crank-spoke absolute inset-y-[9%] left-1/2 w-[9%] -translate-x-1/2" style={{ transform: `translateX(-50%) rotate(${d}deg)` }} />
+            <span key={d} className="crank-spoke absolute inset-y-[9%] left-1/2 w-[9%]" style={{ transform: `translateX(-50%) rotate(${d}deg)` }} />
           ))}
           <div className="crank-hub absolute left-1/2 top-1/2 size-[30%] -translate-x-1/2 -translate-y-1/2 rounded-full" />
           <span className="crank-nut absolute left-1/2 top-1/2 size-[14%] -translate-x-1/2 -translate-y-1/2" />
